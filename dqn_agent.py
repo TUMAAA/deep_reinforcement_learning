@@ -101,6 +101,8 @@ class Agent():
         self.optimizer.zero_grad()
         output = self.qnetwork_local(states)
         output_for_chosen_actions = output.gather(dim=1,index=actions)
+
+        # You can replace max with mean just like SARSAmean
         expected_output = rewards + gamma*self.qnetwork_target(next_states).max(dim=1, keepdim=True)[0]
 
         loss = self.criterion(expected_output, output_for_chosen_actions)
