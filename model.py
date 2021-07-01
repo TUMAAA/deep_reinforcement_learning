@@ -6,7 +6,8 @@ import torch.nn.functional as F
 class QNetwork(nn.Module):
     """Actor (Policy) Model."""
 
-    def __init__(self, state_size, action_size, seed, drop_p = 0.0, hidden_layers_config = [64,64], debug=False):
+    def __init__(self, state_size, action_size, seed, drop_p = 0.0, hidden_layers_config = [64,64], debug=False,
+                 xavier_init=False):
         """Initialize parameters and build model.
         Params
         ======
@@ -33,7 +34,10 @@ class QNetwork(nn.Module):
         for i, layer_details in enumerate(layer_sizes):
             if debug:
                 print(f"hidden layer {i}, layer_details: {layer_details}")
-            self.hidden_layers.extend([nn.Linear(layer_details[0], layer_details[1])])
+            linear_layer = nn.Linear(layer_details[0], layer_details[1])
+            if xavier_init:
+                nn.init.xavier_uniform_(linear_layer.weight)
+            self.hidden_layers.extend([linear_layer])
 
         # self.hidden_layers.extend([nn.Linear(h1, h2) for h1, h2 in layer_sizes])
         if debug:
