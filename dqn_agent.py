@@ -22,7 +22,7 @@ print(f"found device: {device}")
 class Agent():
     """Interacts with and learns from the environment."""
 
-    def __init__(self, state_size, action_size, seed):
+    def __init__(self, state_size, action_size, seed, drop_p=0.0, hidden_layers_config=[64,64]):
         """Initialize an Agent object.
 
         Params
@@ -36,8 +36,8 @@ class Agent():
         self.seed = random.seed(seed)
 
         # Q-Network
-        self.qnetwork_local = QNetwork(state_size, action_size, seed).to(device)
-        self.qnetwork_target = QNetwork(state_size, action_size, seed).to(device)
+        self.qnetwork_local = QNetwork(state_size, action_size, seed, drop_p=drop_p,hidden_layers_config=hidden_layers_config).to(device)
+        self.qnetwork_target = QNetwork(state_size, action_size, seed, drop_p=drop_p,hidden_layers_config=hidden_layers_config).to(device)
         self.optimizer = optim.Adam(self.qnetwork_local.parameters(), lr=LR)
 
         # Replay memory
@@ -105,7 +105,7 @@ class Agent():
         # You can replace max with mean just like SARSAmean
         expected_output = rewards + gamma*self.qnetwork_target(next_states).max(dim=1, keepdim=True)[0]*(1-dones)
 
-        loss = self.criterion(expected_output, output_for_chosen_actions)
+        loss = self.criterion(output_for_chosen_actions, expected_output)
         loss.backward()
         self.optimizer.step()
 
