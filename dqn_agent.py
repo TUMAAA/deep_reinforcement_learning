@@ -24,7 +24,7 @@ class Agent():
 
     def __init__(self, state_size, action_size, seed):
         """Initialize an Agent object.
-        
+
         Params
         ======
             state_size (int): dimension of each state
@@ -103,7 +103,7 @@ class Agent():
         output_for_chosen_actions = output.gather(dim=1,index=actions)
 
         # You can replace max with mean just like SARSAmean
-        expected_output = rewards + gamma*self.qnetwork_target(next_states).max(dim=1, keepdim=True)[0]
+        expected_output = rewards + gamma*self.qnetwork_target(next_states).max(dim=1, keepdim=True)[0]*(1-dones)
 
         loss = self.criterion(expected_output, output_for_chosen_actions)
         loss.backward()
