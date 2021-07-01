@@ -22,7 +22,8 @@ print(f"found device: {device}")
 class Agent():
     """Interacts with and learns from the environment."""
 
-    def __init__(self, state_size, action_size, seed, drop_p=0.0, hidden_layers_config=[64,64]):
+    def __init__(self, state_size, action_size, seed, drop_p=0.0, hidden_layers_config=[64,64],
+                 duelling_networks=False):
         """Initialize an Agent object.
 
         Params
@@ -51,6 +52,7 @@ class Agent():
         self.criterion = torch.nn.MSELoss(
             reduction="mean")  # https://pytorch.org/docs/stable/generated/torch.nn.MSELoss.html#torch.nn.MSELoss
 
+        self.duelling_networks = duelling_networks
 
     def step(self, state, action, reward, next_state, done):
         # Save experience in replay memory
@@ -103,7 +105,7 @@ class Agent():
         output_for_chosen_actions = output.gather(dim=1,index=actions)
 
         # You can replace max with mean just like SARSAmean
-        expected_output = rewards + gamma*self.qnetwork_target(next_states).max(dim=1, keepdim=True)[0]*(1-dones)
+        expected_output = rewards + gamma * self.compute_max_term(next_states) * (1 - dones)
 
         loss = self.criterion(output_for_chosen_actions, expected_output)
         loss.backward()
@@ -133,7 +135,14 @@ class Agent():
         """
         
         # ------------------- update target network ------------------- #
-        self.soft_update(self.qnetwork_local, self.qnetwork_target, TAU)                     
+        self.soft_update(self.qnetwork_local, self.qnetwork_target, TAU)
+
+    def compute_max_term(self, next_states):
+        if self.duelling_networks:
+            actions_maximizing_q = self.qnetwork_local(next_states).max(dim=1, keepdim=True)[1]
+            return self.qnetwork_target(next_states).gather(dim=1,index=actions_maximizing_q)
+        else:
+            return self.qnetwork_target(next_states).max(dim=1, keepdim=True)[0]
 
     def soft_update(self, local_model, target_model, tau):
         """Soft update model parameters.
