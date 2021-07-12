@@ -19,10 +19,9 @@ class QNetwork(nn.Module):
         self.seed = torch.manual_seed(seed)
         "*** YOUR CODE HERE ***"
 
-        # ANAS
         print(f"Initializing model:"
-              f"state_size: {state_size}, action_size: {action_size}"
-              f"hidden_layers_config: {hidden_layers_config}"
+              f"state_size: {state_size}, action_size: {action_size}, "
+              f"hidden_layers_config: {hidden_layers_config}, "
               f"xavier_init: {xavier_init}")
 
         self.hidden_layers_config=hidden_layers_config
@@ -46,7 +45,6 @@ class QNetwork(nn.Module):
                 nn.init.xavier_uniform_(linear_layer.weight)
             self.hidden_layers.extend([linear_layer])
 
-        # self.hidden_layers.extend([nn.Linear(h1, h2) for h1, h2 in layer_sizes])
         if debug:
             print(f"hidden_layers: {self.hidden_layers}")
 
@@ -57,7 +55,6 @@ class QNetwork(nn.Module):
     def forward(self, state):
         """Build a network that maps state -> action values."""
 
-        # ANAS
         x = state
 
         for linear in self.hidden_layers:
