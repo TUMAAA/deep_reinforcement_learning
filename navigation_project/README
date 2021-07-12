@@ -3,5 +3,6 @@ This is the code and report for the Navigation project of the Udacity Deep Reinf
 The code is simply executed by observing the instructions in the Jupyter notebook. The notebook also explains how
 to setup the python environment and get all pre-requisites.
 
-The Navigation.html is a report showing the results obtained when solving the challenge using different DQN configuration.
+The Navigation.html is a report showing the results obtained when solving the challenge using different DQN configurations.
 
+The submitted code builds upon the baseline notebooks and python files provided by Udacity.
