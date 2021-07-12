@@ -39,6 +39,7 @@ class Agent():
         self.seed = random.seed(seed)
 
         # Q-Network
+        # TODO Anas: xavier init
         self.qnetwork_local = QNetwork(state_size, action_size, seed, drop_p=drop_p,
                                        hidden_layers_config=hidden_layers_config).to(device)
         self.qnetwork_target = QNetwork(state_size, action_size, seed, drop_p=drop_p,
@@ -53,8 +54,7 @@ class Agent():
         # ANAS
         self.running_loss = []
         print(f"Device to be used: {device}")
-        self.criterion = torch.nn.MSELoss(
-            reduction="mean")  # https://pytorch.org/docs/stable/generated/torch.nn.MSELoss.html#torch.nn.MSELoss
+        self.criterion = torch.nn.MSELoss()  # https://pytorch.org/docs/stable/generated/torch.nn.MSELoss.html#torch.nn.MSELoss
 
         self.duelling_networks = duelling_networks
 
