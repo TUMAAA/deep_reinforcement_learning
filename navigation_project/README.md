@@ -11,11 +11,10 @@ The agent can choose any of four actions (forward, backward, left, right).
 
 ## Getting started
 
-The code is simply executed by observing the instructions in the Jupyter notebook Navigation.ipynb. The notebook also explains how
-to setup the python environment and get all pre-requisites.
+Detailed instructions to get the environment properly set up with the right Python version and dependencies is provided in the Jupyter notebook Navigation.ipynb. 
 
 ## Instructions
-Simply follow the instructions inside the Navigation.ipynb
+To train the agent simply follow the instructions inside the Navigation.ipynb
 
 ## Sample output
 The Navigation.html is a report showing the results obtained when solving the challenge using different DQN configurations.
