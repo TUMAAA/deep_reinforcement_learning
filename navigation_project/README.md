@@ -2,7 +2,8 @@ This is the code and report for the Navigation project of the Udacity Deep Reinf
 
 ## Project Details
 The project's goal is to train a smart agent that can collect as many yellow bananas in a square world while avoiding black bananas.
-![banana banana](banana.gif "banana")
+
+![banana](banana.gif "banana")
 
 The state is a 37 dimensional composed of the agent's velocity and the observability of bananas along rays around the object.
 
