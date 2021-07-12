@@ -20,8 +20,10 @@ class QNetwork(nn.Module):
         "*** YOUR CODE HERE ***"
 
         # ANAS
-
-        print(f"state_size: {state_size}, action_size: {action_size}")
+        print(f"Initializing model:"
+              f"state_size: {state_size}, action_size: {action_size}"
+              f"hidden_layers_config: {hidden_layers_config}"
+              f"xavier_init: {xavier_init}")
 
         self.hidden_layers_config=hidden_layers_config
 
