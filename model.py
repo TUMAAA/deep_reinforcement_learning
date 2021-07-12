@@ -24,9 +24,15 @@ class QNetwork(nn.Module):
         print(f"state_size: {state_size}, action_size: {action_size}")
 
         self.hidden_layers_config=hidden_layers_config
-        self.hidden_layers = nn.ModuleList([nn.Linear(state_size, hidden_layers_config[0])])
 
-        # Add a variable number of more hidden layers
+        # Input layer
+        input_layer = nn.Linear(state_size, hidden_layers_config[0])
+        if xavier_init:
+            nn.init.xavier_uniform_(input_layer.weight)
+        self.hidden_layers = nn.ModuleList([input_layer])
+
+
+        # hidden layers
         layer_sizes = zip(hidden_layers_config[:-1], hidden_layers_config[1:])
         if debug:
             print(f"layer_sizes: {layer_sizes}")
