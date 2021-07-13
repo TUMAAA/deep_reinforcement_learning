@@ -14,7 +14,8 @@ TAU = 1e-3  # for soft update of target parameters
 LR = 5e-4  # learning rate
 UPDATE_EVERY = 4  # how often to update the network
 
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+device = torch.device("cpu")
+# device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print(f"found device: {device}")
 
 
@@ -54,6 +55,8 @@ class Agent():
         self.criterion = torch.nn.MSELoss(size_average=True, reduce=True) # the course jupyter env has old ver of pytorch https://pytorch.org/docs/0.4.0/nn.html#mseloss
 
         self.duelling_networks = duelling_networks
+        if self.duelling_networks:
+            print("Using duelling networks")
 
     def step(self, state, action, reward, next_state, done):
         self.memory.add(state, action, reward, next_state, done)

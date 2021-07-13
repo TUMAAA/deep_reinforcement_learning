@@ -17,7 +17,6 @@ class QNetwork(nn.Module):
         """
         super(QNetwork, self).__init__()
         self.seed = torch.manual_seed(seed)
-        "*** YOUR CODE HERE ***"
 
         print(f"Initializing model:"
               f"state_size: {state_size}, action_size: {action_size}, "
