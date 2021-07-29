@@ -3,10 +3,9 @@ import random
 from collections import namedtuple, deque
 # from torch import nn # ANAS
 
-from model import QNetwork
+from model.model import QNetwork
 
 import torch
-import torch.nn.functional as F
 import torch.optim as optim
 
 BUFFER_SIZE = int(1e5)  # replay buffer size
