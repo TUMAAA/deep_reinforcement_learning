@@ -1,0 +1,9 @@
+*Banana_Linux_NoVis
+*Banana_Linux
+*.ipynb_checkpoints*
+__pycache__
+venv
+unity-environment.log
+.idea
+
+
