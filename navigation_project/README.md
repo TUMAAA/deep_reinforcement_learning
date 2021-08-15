@@ -14,7 +14,9 @@ The agent can choose any of four actions (forward, backward, left, right).
 Detailed instructions to get the environment properly set up with the right Python version and dependencies is provided in the Jupyter notebook Navigation.ipynb. 
 
 ## Instructions
-To train the agent simply follow the instructions inside the Navigation.ipynb
+Make sure to run the Jupyter Notebook server from the repository root. This way the needed packaged "module" can be imported.
+
+To train the agent simply follow the instructions inside the Navigation.ipynb.
 
 ## Sample output
 The Report.html is a report showing the results obtained when solving the challenge using different DQN configurations.
