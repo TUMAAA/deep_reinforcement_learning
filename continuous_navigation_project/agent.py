@@ -13,18 +13,21 @@ import torch.optim as optim
 
 BUFFER_SIZE = int(1e5)  # replay buffer size
 BATCH_SIZE = 128  # minibatch size
-GAMMA = 0.99  # discount factor
+GAMMA = 0.99  # discount factor to compute discounted returns
 TAU = 1e-3  # for soft update of target parameters
 LR_ACTOR = 1e-4  # learning rate of the actor
-LR_CRITIC = 1e-4  # learning rate of the critic
+LR_CRITIC = 1e-4  # learning rate of the critic (this is different from the 1e-3 used by the pendulum project which fails here).
 WEIGHT_DECAY = 0.0  # L2 weight decay
 TIME_STEPS_BEFORE_TRAINING = 20  # accumulate enough experience before training
 NUM_TRAININGS_PER_UPDATE = 10  # number of forward backward passes every time training is performed
 NUM_EPISODES_TO_INCREASE_NUM_TRAININGS = 200  # Increase multiplier of NUM_TRAININGS_PER_UPDATE by 1 every amount of episodes set here
 NOISE_VARIANCE = 1.0
 NOISE_DECAY = 1e-6  # Decay factor for noise variance increasing exploitation
+
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+print("--------------------------------------------------------------")
 print(f"device used: {device}")
+print("--------------------------------------------------------------")
 
 
 class Agent():
@@ -68,7 +71,7 @@ class Agent():
         # Replay memory
         self.memory = ReplayBuffer(action_size, BUFFER_SIZE, BATCH_SIZE, random_seed)
 
-    def step(self, state, time_step, i_episode, action, reward, next_state, done):
+    def step(self, time_step, i_episode, state, action, reward, next_state, done):
         """Save experience in replay memory, and use random sample from buffer to learn."""
         # Save experience / reward
         self.memory.add(state, action, reward, next_state, done)
@@ -77,8 +80,8 @@ class Agent():
             return
 
         # Learn, if enough samples are available in memory
-        num_trainings = NUM_TRAININGS_PER_UPDATE * (int(i_episode / NUM_EPISODES_TO_INCREASE_NUM_TRAININGS) + 1)
         if len(self.memory) > BATCH_SIZE:
+            num_trainings = NUM_TRAININGS_PER_UPDATE * (int(i_episode / NUM_EPISODES_TO_INCREASE_NUM_TRAININGS) + 1)
             for i in range(num_trainings):
                 experiences = self.memory.sample()
                 self.learn(experiences, GAMMA)
