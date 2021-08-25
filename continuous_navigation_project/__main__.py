@@ -10,6 +10,7 @@ from continuous_navigation_project.agent import Agent
 
 MIN_AVG_SCORE_OVER_LAST_HUNDRED_EPISODES_TO_BEAT = 30.0
 MAX_TIMESTEPS_PER_EPISODE = 400
+LOAD_PRETRAINED_MODEL = False
 
 env = UnityEnvironment(file_name='Reacher_Twenty_Linux_NoVis/Reacher.x86_64')
 brain_name = env.brain_names[0]
@@ -103,5 +104,12 @@ def ddpg(agent, n_episodes=1000, max_t=300, print_every=100):
 
 
 agent = Agent(state_size=state_size, action_size=action_size, random_seed=2)
-scores_global, episode_durations = ddpg(agent=agent, n_episodes=250, max_t=MAX_TIMESTEPS_PER_EPISODE, print_every=20)
+if LOAD_PRETRAINED_MODEL:
+    agent.actor_local.load_state_dict(torch.load("checkpoint_actor.pth"))
+    agent.actor_target.load_state_dict(torch.load("checkpoint_actor.pth"))
+    agent.actor_local.load_state_dict(torch.load("checkpoint_actor.pth"))
+    agent.critic_target.load_state_dict(torch.load("checkpoint_critic.pth"))
+    agent.critic_local.load_state_dict(torch.load("checkpoint_critic.pth"))
+
+scores_global, episode_durations = ddpg(agent=agent, n_episodes=140, max_t=MAX_TIMESTEPS_PER_EPISODE, print_every=20)
 generate_training_plots(scores_global, episode_durations)
