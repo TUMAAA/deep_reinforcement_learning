@@ -10,7 +10,6 @@ from continuous_navigation_project.agent import Agent
 
 MIN_AVG_SCORE_OVER_LAST_HUNDRED_EPISODES_TO_BEAT = 30.0
 MAX_TIMESTEPS_PER_EPISODE = 400
-LOAD_PRETRAINED_MODEL = False
 
 env = UnityEnvironment(file_name='Reacher_Twenty_Linux_NoVis/Reacher.x86_64')
 brain_name = env.brain_names[0]
@@ -56,6 +55,7 @@ def generate_training_plots(scores_global, episode_durations, attributes):
     fig.suptitle(title,fontsize=7)
     plt.show()
 
+load_pretrained_model = False
 
 def ddpg(agent, n_episodes=1000, max_t=300, print_every=100):
     mean_episode_score_deque = deque(maxlen=print_every)
@@ -78,6 +78,7 @@ def ddpg(agent, n_episodes=1000, max_t=300, print_every=100):
             for i_agent in range(num_agents):
                 agent.step(t,
                            i_episode,
+                           i_agent,
                            states[i_agent].astype(np.float32),
                            actions[i_agent],
                            rewards[i_agent],
@@ -115,8 +116,10 @@ def ddpg(agent, n_episodes=1000, max_t=300, print_every=100):
     return scores_global, episode_durations
 
 
-agent = Agent(state_size=state_size, action_size=action_size, random_seed=2)
-if LOAD_PRETRAINED_MODEL:
+agent = Agent(state_size=state_size, action_size=action_size, random_seed=2, num_parallel_agents=num_agents,
+              num_trainings_per_update=20,
+              time_steps_before_training=20)
+if load_pretrained_model:
     agent.actor_local.load_state_dict(torch.load("checkpoint_actor.pth"))
     agent.actor_target.load_state_dict(torch.load("checkpoint_actor.pth"))
     agent.actor_local.load_state_dict(torch.load("checkpoint_actor.pth"))
