@@ -55,8 +55,8 @@ def generate_training_plots(scores_global, episode_durations, attributes):
     plt.plot(np.arange(1, num_episodes + 1), episode_durations)
     plt.ylabel('Training Duration [s]')
     plt.xlabel('Episode #')
-    title= generate_plot_name(attributes)
-    fig.suptitle(title,fontsize=7)
+    title = generate_plot_name(attributes)
+    fig.suptitle(title, fontsize=7)
     plt.show()
 
 
@@ -125,7 +125,10 @@ def ddpg(agent, n_episodes=1000, max_t=300, print_every=100):
 agent = Agent(state_size=state_size, action_size=action_size, random_seed=2, num_parallel_agents=num_agents,
               num_trainings_per_update=20,
               time_steps_before_training=20,
-              batch_size=256)
+              batch_size=512,
+              num_episodes_to_increase_num_trainings=80,
+              lr_actor=1e-3,
+              lr_critic=1e-3)
 if load_pretrained_model:
     agent.actor_local.load_state_dict(torch.load("checkpoint_actor.pth"))
     agent.actor_target.load_state_dict(torch.load("checkpoint_actor.pth"))
@@ -133,7 +136,7 @@ if load_pretrained_model:
     agent.critic_target.load_state_dict(torch.load("checkpoint_critic.pth"))
     agent.critic_local.load_state_dict(torch.load("checkpoint_critic.pth"))
 
-scores_global, episode_durations = ddpg(agent=agent, n_episodes=3, max_t=MAX_TIMESTEPS_PER_EPISODE, print_every=20)
+scores_global, episode_durations = ddpg(agent=agent, n_episodes=100, max_t=MAX_TIMESTEPS_PER_EPISODE, print_every=20)
 generate_training_plots(scores_global, episode_durations,
                         {"critic": agent.critic_local.__repr__(),
                          "actor": agent.actor_local.__repr__(),
@@ -143,4 +146,5 @@ generate_training_plots(scores_global, episode_durations,
                          "max_t": MAX_TIMESTEPS_PER_EPISODE,
                          "time_steps_before_training": agent.time_steps_before_training,
                          "num_trainings_per_update": agent.num_trainings_per_update,
+                         "num_episodes_to_increase_num_trainings": agent.num_episodes_to_increase_num_trainings,
                          "noise_decay": agent.noise_decay})

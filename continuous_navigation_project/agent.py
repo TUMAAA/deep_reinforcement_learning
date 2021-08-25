@@ -14,8 +14,6 @@ import torch.optim as optim
 BUFFER_SIZE = int(1e6)  # replay buffer size
 GAMMA = 0.99  # discount factor to compute discounted returns
 TAU = 1e-3  # for soft update of target parameters
-LR_ACTOR = 1e-4  # learning rate of the actor
-LR_CRITIC = 1e-4  # learning rate of the critic (this is different from the 1e-3 used by the pendulum project which fails here).
 WEIGHT_DECAY = 0.0  # L2 weight decay
 NOISE_VARIANCE = 1.0
 
@@ -28,7 +26,14 @@ print("--------------------------------------------------------------")
 class Agent():
     """Interacts with and learns from the environment."""
 
-    def __init__(self, state_size, action_size, random_seed, batch_size, num_parallel_agents, time_steps_before_training=20, num_trainings_per_update=1, noise_decay=1e-6,
+    def __init__(self, state_size, action_size, random_seed,
+                 batch_size,
+                 num_parallel_agents,
+                 lr_actor = 1e-4,
+                 lr_critic = 1e-4,
+                 time_steps_before_training=20,
+                 num_trainings_per_update=1,
+                 noise_decay=1e-6,
                  num_episodes_to_increase_num_trainings=150):
         """Initialize an Agent object.
 
@@ -38,6 +43,8 @@ class Agent():
             action_size (int): dimension of each action
             random_seed (int): random seed
         """
+        self.lr_actor = lr_actor
+        self.lr_critic = lr_critic
         self.batch_size = batch_size
         self.num_parallel_agents = num_parallel_agents
         self.noise_decay = noise_decay
@@ -55,7 +62,7 @@ class Agent():
         self.actor_target = Actor(state_size, action_size, random_seed, fc1_units=300, fc2_units=200, fc3_units=100).to(
             device)
 
-        self.actor_optimizer = optim.Adam(self.actor_local.parameters(), lr=LR_ACTOR, weight_decay=WEIGHT_DECAY)
+        self.actor_optimizer = optim.Adam(self.actor_local.parameters(), lr=self.lr_actor, weight_decay=WEIGHT_DECAY)
 
         # Critic Network (w/ Target Network)
         self.critic_local = Critic(state_size, action_size, random_seed, fcs1_units=600, fc2_units=400,
@@ -64,7 +71,7 @@ class Agent():
         self.critic_target = Critic(state_size, action_size, random_seed, fcs1_units=600, fc2_units=400,
                                     fc3_units=100).to(device)
 
-        self.critic_optimizer = optim.Adam(self.critic_local.parameters(), lr=LR_CRITIC, weight_decay=WEIGHT_DECAY)
+        self.critic_optimizer = optim.Adam(self.critic_local.parameters(), lr=self.lr_critic, weight_decay=WEIGHT_DECAY)
 
         # Noise process
         self.noise_variance = NOISE_VARIANCE
