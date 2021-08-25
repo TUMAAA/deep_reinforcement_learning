@@ -11,18 +11,14 @@ import torch
 import torch.nn.functional as F
 import torch.optim as optim
 
-BUFFER_SIZE = int(1e5)  # replay buffer size
+BUFFER_SIZE = int(1e6)  # replay buffer size
 BATCH_SIZE = 128  # minibatch size
 GAMMA = 0.99  # discount factor to compute discounted returns
 TAU = 1e-3  # for soft update of target parameters
 LR_ACTOR = 1e-4  # learning rate of the actor
 LR_CRITIC = 1e-4  # learning rate of the critic (this is different from the 1e-3 used by the pendulum project which fails here).
 WEIGHT_DECAY = 0.0  # L2 weight decay
-TIME_STEPS_BEFORE_TRAINING = 20  # accumulate enough experience before training
-NUM_TRAININGS_PER_UPDATE = 10  # number of forward backward passes every time training is performed
-NUM_EPISODES_TO_INCREASE_NUM_TRAININGS = 200  # Increase multiplier of NUM_TRAININGS_PER_UPDATE by 1 every amount of episodes set here
 NOISE_VARIANCE = 1.0
-NOISE_DECAY = 1e-6  # Decay factor for noise variance increasing exploitation
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print("--------------------------------------------------------------")
@@ -33,7 +29,8 @@ print("--------------------------------------------------------------")
 class Agent():
     """Interacts with and learns from the environment."""
 
-    def __init__(self, state_size, action_size, random_seed):
+    def __init__(self, state_size, action_size, random_seed, time_steps_before_training=20, num_trainings_per_update=2, noise_decay=1e-6,
+                 num_episodes_to_increase_num_trainings=150):
         """Initialize an Agent object.
 
         Params
@@ -42,6 +39,10 @@ class Agent():
             action_size (int): dimension of each action
             random_seed (int): random seed
         """
+        self.noise_decay = noise_decay
+        self.time_steps_before_training = time_steps_before_training
+        self.num_trainings_per_update = num_trainings_per_update
+        self.num_episodes_to_increase_num_trainings = num_episodes_to_increase_num_trainings
         self.state_size = state_size
         self.action_size = action_size
         self.seed = random.seed(random_seed)
@@ -53,7 +54,7 @@ class Agent():
         self.actor_target = Actor(state_size, action_size, random_seed, fc1_units=300, fc2_units=200, fc3_units=100).to(
             device)
 
-        self.actor_optimizer = optim.Adam(self.actor_local.parameters(), lr=LR_ACTOR)
+        self.actor_optimizer = optim.Adam(self.actor_local.parameters(), lr=LR_ACTOR, weight_decay=WEIGHT_DECAY)
 
         # Critic Network (w/ Target Network)
         self.critic_local = Critic(state_size, action_size, random_seed, fcs1_units=600, fc2_units=400,
@@ -76,12 +77,12 @@ class Agent():
         # Save experience / reward
         self.memory.add(state, action, reward, next_state, done)
 
-        if time_step % TIME_STEPS_BEFORE_TRAINING != 0:
+        if time_step % self.time_steps_before_training != 0:
             return
 
         # Learn, if enough samples are available in memory
         if len(self.memory) > BATCH_SIZE:
-            num_trainings = NUM_TRAININGS_PER_UPDATE * (int(i_episode / NUM_EPISODES_TO_INCREASE_NUM_TRAININGS) + 1)
+            num_trainings = self.num_trainings_per_update * (int(i_episode / self.num_episodes_to_increase_num_trainings) + 1)
             for i in range(num_trainings):
                 experiences = self.memory.sample()
                 self.learn(experiences, GAMMA)
@@ -94,7 +95,7 @@ class Agent():
             action = self.actor_local(state).cpu().data.numpy()
         self.actor_local.train()
         if add_noise:
-            self.noise_variance = self.noise_variance * NOISE_DECAY
+            self.noise_variance = self.noise_variance * self.noise_decay
             action += self.noise_variance * self.noise.sample()
         return np.clip(action, -1, 1)
 

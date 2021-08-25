@@ -32,16 +32,28 @@ print('There are {} agents. Each observes a state with length: {}'.format(states
 print('The state for the first agent looks like:', states[0])
 
 
-def generate_training_plots(scores_global, episode_durations):
+def generate_plot_name(attributes: dict):
+    title = ""
+    for key in attributes.keys():
+        title += "{} {}\n".format(key,attributes[key])
+
+    return title
+
+
+def generate_training_plots(scores_global, episode_durations, attributes):
     fig = plt.figure()
-    ax = fig.add_subplot(211)
+    ax = fig.add_subplot(413)
     plt.plot(np.arange(1, len(scores_global) + 1), scores_global)
     plt.ylabel('Accum Rewards (Score)')
     plt.xlabel('Episode #')
-    ax = fig.add_subplot(212)
-    plt.plot(np.arange(1, len(episode_durations) + 1), episode_durations)
+    plt.ylim(0, 80)
+    ax = fig.add_subplot(414)
+    num_episodes = len(episode_durations)
+    plt.plot(np.arange(1, num_episodes + 1), episode_durations)
     plt.ylabel('Training Duration [s]')
     plt.xlabel('Episode #')
+    title= generate_plot_name(attributes)
+    fig.suptitle(title,fontsize=7)
     plt.show()
 
 
@@ -112,4 +124,11 @@ if LOAD_PRETRAINED_MODEL:
     agent.critic_local.load_state_dict(torch.load("checkpoint_critic.pth"))
 
 scores_global, episode_durations = ddpg(agent=agent, n_episodes=140, max_t=MAX_TIMESTEPS_PER_EPISODE, print_every=20)
-generate_training_plots(scores_global, episode_durations)
+generate_training_plots(scores_global, episode_durations,{"critic":agent.critic_local.__repr__(),
+                                                          "actor":agent.actor_local.__repr__(),
+                                                          "critic_optim":agent.critic_optimizer.__repr__().replace("\n",", "),
+                                                          "actor_optim":agent.actor_optimizer.__repr__().replace("\n",", "),
+                                                          "max_t":MAX_TIMESTEPS_PER_EPISODE,
+                                                          "time_steps_before_training":agent.time_steps_before_training,
+                                                          "num_trainings_per_update":agent.num_trainings_per_update,
+                                                          "noise_decay":agent.noise_decay})

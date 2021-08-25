@@ -50,6 +50,9 @@ class Actor(nn.Module):
         # x = F.relu(self.fc3(x))
         return F.tanh(self.fc3(x))
 
+    def get_model_properties(self):
+        return self.parameters().__str__
+
 
 class Critic(nn.Module):
     """Critic (Value) Model."""
@@ -82,7 +85,8 @@ class Critic(nn.Module):
 
     def forward(self, state, action):
         """Build a critic (value) network that maps (state, action) pairs -> Q-values."""
-        xs = self.bn0(state)
+        xs = state
+        # xs = self.bn0(xs)
         xs = F.relu(self.fcs1(xs))
         x = torch.cat((xs, action), dim=1)
         x = F.relu(self.fc2(x))
