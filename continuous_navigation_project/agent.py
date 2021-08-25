@@ -73,6 +73,11 @@ class Agent():
 
         self.critic_optimizer = optim.Adam(self.critic_local.parameters(), lr=self.lr_critic, weight_decay=WEIGHT_DECAY)
 
+        # To ensure local and target models have the same weights as required by DDPG
+        # This step was forgotten by the Udacity guys.
+        # See https://knowledge.udacity.com/questions/98687
+        self.soft_update(self.actor_local,self.actor_target,1.0)
+        self.soft_update(self.critic_local, self.critic_target, 1.0)
         # Noise process
         self.noise_variance = NOISE_VARIANCE
         self.noise = OUNoise(action_size, random_seed)
