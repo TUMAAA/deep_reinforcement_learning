@@ -12,7 +12,6 @@ import torch.nn.functional as F
 import torch.optim as optim
 
 BUFFER_SIZE = int(1e6)  # replay buffer size
-BATCH_SIZE = 128  # minibatch size
 GAMMA = 0.99  # discount factor to compute discounted returns
 TAU = 1e-3  # for soft update of target parameters
 LR_ACTOR = 1e-4  # learning rate of the actor
@@ -29,7 +28,7 @@ print("--------------------------------------------------------------")
 class Agent():
     """Interacts with and learns from the environment."""
 
-    def __init__(self, state_size, action_size, random_seed, num_parallel_agents, time_steps_before_training=20, num_trainings_per_update=1, noise_decay=1e-6,
+    def __init__(self, state_size, action_size, random_seed, batch_size, num_parallel_agents, time_steps_before_training=20, num_trainings_per_update=1, noise_decay=1e-6,
                  num_episodes_to_increase_num_trainings=150):
         """Initialize an Agent object.
 
@@ -39,6 +38,7 @@ class Agent():
             action_size (int): dimension of each action
             random_seed (int): random seed
         """
+        self.batch_size = batch_size
         self.num_parallel_agents = num_parallel_agents
         self.noise_decay = noise_decay
         self.time_steps_before_training = time_steps_before_training
@@ -71,7 +71,7 @@ class Agent():
         self.noise = OUNoise(action_size, random_seed)
 
         # Replay memory
-        self.memory = ReplayBuffer(action_size, BUFFER_SIZE, BATCH_SIZE, random_seed)
+        self.memory = ReplayBuffer(action_size, BUFFER_SIZE, self.batch_size, random_seed)
 
     def step(self, time_step, i_episode, i_agent, state, action, reward, next_state, done):
         """Save experience in replay memory, and use random sample from buffer to learn."""
@@ -82,7 +82,7 @@ class Agent():
             return
 
         # Learn, if enough samples are available in memory
-        if len(self.memory) > BATCH_SIZE and i_agent == (self.num_parallel_agents - 1):
+        if len(self.memory) > self.batch_size and i_agent == (self.num_parallel_agents - 1):
             num_trainings = self.num_trainings_per_update * (int(i_episode / self.num_episodes_to_increase_num_trainings) + 1)
             for i in range(num_trainings):
                 experiences = self.memory.sample()

@@ -7,7 +7,6 @@ import torch
 
 from continuous_navigation_project.agent import Agent
 
-
 MIN_AVG_SCORE_OVER_LAST_HUNDRED_EPISODES_TO_BEAT = 30.0
 MAX_TIMESTEPS_PER_EPISODE = 400
 
@@ -34,7 +33,7 @@ print('The state for the first agent looks like:', states[0])
 def generate_plot_name(attributes: dict):
     title = ""
     for key in attributes.keys():
-        title += "{} {}\n".format(key,attributes[key])
+        title += "{} {}\n".format(key, attributes[key])
 
     return title
 
@@ -45,7 +44,12 @@ def generate_training_plots(scores_global, episode_durations, attributes):
     plt.plot(np.arange(1, len(scores_global) + 1), scores_global)
     plt.ylabel('Accum Rewards (Score)')
     plt.xlabel('Episode #')
-    plt.ylim(0, 80)
+    max_y = 50
+    plt.ylim(0, max_y)
+    grid_step = 10
+    ax.set_yticks(range(10, max_y, grid_step), minor=False)
+    ax.yaxis.grid(True,which="major")
+
     ax = fig.add_subplot(414)
     num_episodes = len(episode_durations)
     plt.plot(np.arange(1, num_episodes + 1), episode_durations)
@@ -55,7 +59,9 @@ def generate_training_plots(scores_global, episode_durations, attributes):
     fig.suptitle(title,fontsize=7)
     plt.show()
 
+
 load_pretrained_model = False
+
 
 def ddpg(agent, n_episodes=1000, max_t=300, print_every=100):
     mean_episode_score_deque = deque(maxlen=print_every)
@@ -118,7 +124,8 @@ def ddpg(agent, n_episodes=1000, max_t=300, print_every=100):
 
 agent = Agent(state_size=state_size, action_size=action_size, random_seed=2, num_parallel_agents=num_agents,
               num_trainings_per_update=20,
-              time_steps_before_training=20)
+              time_steps_before_training=20,
+              batch_size=256)
 if load_pretrained_model:
     agent.actor_local.load_state_dict(torch.load("checkpoint_actor.pth"))
     agent.actor_target.load_state_dict(torch.load("checkpoint_actor.pth"))
@@ -126,12 +133,14 @@ if load_pretrained_model:
     agent.critic_target.load_state_dict(torch.load("checkpoint_critic.pth"))
     agent.critic_local.load_state_dict(torch.load("checkpoint_critic.pth"))
 
-scores_global, episode_durations = ddpg(agent=agent, n_episodes=140, max_t=MAX_TIMESTEPS_PER_EPISODE, print_every=20)
-generate_training_plots(scores_global, episode_durations,{"critic":agent.critic_local.__repr__(),
-                                                          "actor":agent.actor_local.__repr__(),
-                                                          "critic_optim":agent.critic_optimizer.__repr__().replace("\n",", "),
-                                                          "actor_optim":agent.actor_optimizer.__repr__().replace("\n",", "),
-                                                          "max_t":MAX_TIMESTEPS_PER_EPISODE,
-                                                          "time_steps_before_training":agent.time_steps_before_training,
-                                                          "num_trainings_per_update":agent.num_trainings_per_update,
-                                                          "noise_decay":agent.noise_decay})
+scores_global, episode_durations = ddpg(agent=agent, n_episodes=3, max_t=MAX_TIMESTEPS_PER_EPISODE, print_every=20)
+generate_training_plots(scores_global, episode_durations,
+                        {"critic": agent.critic_local.__repr__(),
+                         "actor": agent.actor_local.__repr__(),
+                         "critic_optim": agent.critic_optimizer.__repr__().replace("\n", ", "),
+                         "actor_optim": agent.actor_optimizer.__repr__().replace("\n", ", "),
+                         "batch_size": agent.batch_size,
+                         "max_t": MAX_TIMESTEPS_PER_EPISODE,
+                         "time_steps_before_training": agent.time_steps_before_training,
+                         "num_trainings_per_update": agent.num_trainings_per_update,
+                         "noise_decay": agent.noise_decay})
