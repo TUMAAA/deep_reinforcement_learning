@@ -8,7 +8,6 @@ import torch
 from continuous_navigation_project.agent import Agent
 
 MIN_AVG_SCORE_OVER_LAST_HUNDRED_EPISODES_TO_BEAT = 30.0
-MAX_TIMESTEPS_PER_EPISODE = 400
 
 env = UnityEnvironment(file_name='Reacher_Twenty_Linux_NoVis/Reacher.x86_64')
 brain_name = env.brain_names[0]
@@ -63,13 +62,18 @@ def generate_training_plots(scores_global, episode_durations, attributes):
 load_pretrained_model = False
 
 
-def ddpg(agent, n_episodes=1000, max_t=300, print_every=100):
+def ddpg(agent, n_episodes=1000, max_t=300, print_every=100, episodes_to_make_target_equal_to_local=10):
     mean_episode_score_deque = deque(maxlen=print_every)
     scores_global = []
     episode_durations = []
     global_start_time = time.time()
     for i_episode in range(1, n_episodes + 1):
-        start_time = time.time()
+        episode_start_time = time.time()
+        if i_episode % episodes_to_make_target_equal_to_local == 0:
+            print("\rresetting target to be equal to local", end="")
+            time.sleep(0.5)
+            agent.soft_update(agent.actor_local, agent.actor_target, tau=1.0)
+            agent.soft_update(agent.critic_local, agent.critic_target, tau=1.0)
         env_info = env.reset(train_mode=True)[brain_name]
         num_agents = len(env_info.rewards)
         states = env_info.vector_observations
@@ -142,7 +146,13 @@ if load_pretrained_model:
     agent.critic_target.load_state_dict(torch.load("checkpoint_critic.pth"))
     agent.critic_local.load_state_dict(torch.load("checkpoint_critic.pth"))
 
-scores_global, episode_durations = ddpg(agent=agent, n_episodes=80, max_t=MAX_TIMESTEPS_PER_EPISODE, print_every=20)
+episodes_to_make_target_equal_to_local = 5
+max_timesteps_per_episode = 400
+scores_global, episode_durations = ddpg(agent=agent,
+                                        n_episodes=80,
+                                        max_t=episodes_to_make_target_equal_to_local,
+                                        print_every=20,
+                                        episodes_to_make_target_equal_to_local= episodes_to_make_target_equal_to_local)
 generate_training_plots(scores_global, episode_durations,
                         {"critic": agent.critic_local.__repr__(),
                          "actor": agent.actor_local.__repr__(),
@@ -150,9 +160,10 @@ generate_training_plots(scores_global, episode_durations,
                          "actor_optim": agent.actor_optimizer.__repr__().replace("\n", ", "),
                          "clip_grad_norm": agent.clip_grad_norm,
                          "batch_size": agent.batch_size,
-                         "max_t": MAX_TIMESTEPS_PER_EPISODE,
+                         "max_t": episodes_to_make_target_equal_to_local,
                          "time_steps_before_training": agent.time_steps_before_training,
                          "num_trainings_per_update": agent.num_trainings_per_update,
                          "num_episodes_to_increase_num_trainings": agent.num_episodes_to_increase_num_trainings,
-                         "noise_decay": agent.noise_decay
+                         "noise_decay": agent.noise_decay,
+                         "episodes_to_make_target_equal_to_local": episodes_to_make_target_equal_to_local
                          })
