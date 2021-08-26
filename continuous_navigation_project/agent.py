@@ -4,17 +4,17 @@ import numpy as np
 import random
 import copy
 from collections import namedtuple, deque
-
-from .model import Actor, Critic
-
 import torch
 import torch.nn.functional as F
 import torch.optim as optim
+import time
 
+from .model import Actor, Critic
+
+DEBUG = False
 BUFFER_SIZE = int(1e6)  # replay buffer size
 GAMMA = 0.99  # discount factor to compute discounted returns
 TAU = 1e-3  # for soft update of target parameters
-WEIGHT_DECAY = 0.0  # L2 weight decay
 NOISE_VARIANCE = 1.0
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -34,7 +34,9 @@ class Agent():
                  time_steps_before_training=20,
                  num_trainings_per_update=1,
                  noise_decay=1e-6,
-                 num_episodes_to_increase_num_trainings=150):
+                 num_episodes_to_increase_num_trainings=150,
+                 make_local_target_weights_equal_at_init=False,
+                 weight_decay=0.0):
         """Initialize an Agent object.
 
         Params
@@ -43,6 +45,7 @@ class Agent():
             action_size (int): dimension of each action
             random_seed (int): random seed
         """
+        self.weight_decay = weight_decay
         self.lr_actor = lr_actor
         self.lr_critic = lr_critic
         self.batch_size = batch_size
@@ -62,7 +65,7 @@ class Agent():
         self.actor_target = Actor(state_size, action_size, random_seed, fc1_units=300, fc2_units=200, fc3_units=100).to(
             device)
 
-        self.actor_optimizer = optim.Adam(self.actor_local.parameters(), lr=self.lr_actor, weight_decay=WEIGHT_DECAY)
+        self.actor_optimizer = optim.Adam(self.actor_local.parameters(), lr=self.lr_actor, weight_decay=self.weight_decay)
 
         # Critic Network (w/ Target Network)
         self.critic_local = Critic(state_size, action_size, random_seed, fcs1_units=600, fc2_units=400,
@@ -71,13 +74,14 @@ class Agent():
         self.critic_target = Critic(state_size, action_size, random_seed, fcs1_units=600, fc2_units=400,
                                     fc3_units=100).to(device)
 
-        self.critic_optimizer = optim.Adam(self.critic_local.parameters(), lr=self.lr_critic, weight_decay=WEIGHT_DECAY)
+        self.critic_optimizer = optim.Adam(self.critic_local.parameters(), lr=self.lr_critic, weight_decay=self.weight_decay)
 
         # To ensure local and target models have the same weights as required by DDPG
         # This step was forgotten by the Udacity guys.
         # See https://knowledge.udacity.com/questions/98687
-        self.soft_update(self.actor_local,self.actor_target,1.0)
-        self.soft_update(self.critic_local, self.critic_target, 1.0)
+        if make_local_target_weights_equal_at_init:
+            self.soft_update(self.actor_local,self.actor_target,1.0)
+            self.soft_update(self.critic_local, self.critic_target, 1.0)
         # Noise process
         self.noise_variance = NOISE_VARIANCE
         self.noise = OUNoise(action_size, random_seed)
@@ -99,6 +103,9 @@ class Agent():
             for i in range(num_trainings):
                 experiences = self.memory.sample()
                 self.learn(experiences, GAMMA)
+                if DEBUG:
+                    print(f"\rTraining. i_agent: {i_agent}, i_episode: {i_episode}, time_step: {time_step}, i_training: {i}",end="")
+                    time.sleep(0.1)
 
     def act(self, state, add_noise=True):
         """Returns actions for given state as per current policy."""
