@@ -134,7 +134,7 @@ agent = Agent(state_size=state_size, action_size=action_size, random_seed=2, num
               num_trainings_per_update=20,
               time_steps_before_training=20,
               batch_size=128,
-              num_episodes_to_increase_num_trainings=120,
+              num_episodes_to_increase_num_trainings=180,
               lr_actor=1e-4,
               lr_critic=1e-4,
               make_local_target_weights_equal_at_init=True,
