@@ -62,18 +62,13 @@ def generate_training_plots(scores_global, episode_durations, attributes):
 load_pretrained_model = False
 
 
-def ddpg(agent, n_episodes=1000, max_t=300, print_every=100, episodes_to_make_target_equal_to_local=10,
-         episodes_to_flush_experience_buffer=100):
+def ddpg(agent, n_episodes=1000, max_t=300, print_every=100, episodes_to_make_target_equal_to_local=10):
     mean_episode_score_deque = deque(maxlen=print_every)
     scores_global = []
     episode_durations = []
     global_start_time = time.time()
     for i_episode in range(1, n_episodes + 1):
         episode_start_time = time.time()
-        if i_episode % episodes_to_flush_experience_buffer == 0:
-            print("\nClearing experience replay buffer", end="\n")
-            agent.memory.memory.clear()
-            time.sleep(2)
         if i_episode % episodes_to_make_target_equal_to_local == 0:
             print("\rresetting target to be equal to local", end="")
             time.sleep(0.5)
@@ -152,14 +147,12 @@ if load_pretrained_model:
     agent.critic_local.load_state_dict(torch.load("checkpoint_critic.pth"))
 
 episodes_to_make_target_equal_to_local = 5
-episodes_to_flush_experience_buffer = 80
-max_timesteps_per_episode = 400
+max_timesteps_per_episode = 1000
 scores_global, episode_durations = ddpg(agent=agent,
                                         n_episodes=180,
                                         max_t=max_timesteps_per_episode,
                                         print_every=20,
-                                        episodes_to_make_target_equal_to_local=episodes_to_make_target_equal_to_local,
-                                        episodes_to_flush_experience_buffer=episodes_to_flush_experience_buffer)
+                                        episodes_to_make_target_equal_to_local=episodes_to_make_target_equal_to_local)
 generate_training_plots(scores_global, episode_durations,
                         {"critic": agent.critic_local.__repr__(),
                          "actor": agent.actor_local.__repr__(),
@@ -172,6 +165,5 @@ generate_training_plots(scores_global, episode_durations,
                          "num_trainings_per_update": agent.num_trainings_per_update,
                          "num_episodes_to_increase_num_trainings": agent.num_episodes_to_increase_num_trainings,
                          "noise_decay": agent.noise_decay,
-                         "episodes_to_make_target_equal_to_local": episodes_to_make_target_equal_to_local,
-                         "episodes_to_flush_experience_buffer": episodes_to_flush_experience_buffer
+                         "episodes_to_make_target_equal_to_local": episodes_to_make_target_equal_to_local
                          })
