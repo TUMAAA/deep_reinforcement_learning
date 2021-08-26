@@ -29,8 +29,8 @@ class Agent():
     def __init__(self, state_size, action_size, random_seed,
                  batch_size,
                  num_parallel_agents,
-                 lr_actor = 1e-4,
-                 lr_critic = 1e-4,
+                 lr_actor=1e-4,
+                 lr_critic=1e-4,
                  time_steps_before_training=20,
                  num_trainings_per_update=1,
                  noise_decay=1e-6,
@@ -61,29 +61,35 @@ class Agent():
         self.seed = random.seed(random_seed)
 
         # Actor Network (w/ Target Network)
-        self.actor_local = Actor(state_size, action_size, random_seed, fc1_units=300, fc2_units=200, fc3_units=100).to(
-            device)
+        self.actor_local = [Actor(state_size, action_size, random_seed, fc1_units=300, fc2_units=200, fc3_units=100).to(
+            device) for i in range(num_parallel_agents)]
 
-        self.actor_target = Actor(state_size, action_size, random_seed, fc1_units=300, fc2_units=200, fc3_units=100).to(
-            device)
+        self.actor_target = [
+            Actor(state_size, action_size, random_seed, fc1_units=300, fc2_units=200, fc3_units=100).to(
+                device) for i in range(num_parallel_agents)]
 
-        self.actor_optimizer = optim.Adam(self.actor_local.parameters(), lr=self.lr_actor, weight_decay=self.weight_decay)
+        self.actor_optimizer = [
+            optim.Adam(self.actor_local[i].parameters(), lr=self.lr_actor, weight_decay=self.weight_decay) for i in
+            range(num_parallel_agents)]
 
         # Critic Network (w/ Target Network)
-        self.critic_local = Critic(state_size, action_size, random_seed, fcs1_units=600, fc2_units=400,
-                                   fc3_units=100).to(device)
+        self.critic_local = [Critic(state_size, action_size, random_seed, fcs1_units=600, fc2_units=400,
+                                    fc3_units=100).to(device) for i in range(num_parallel_agents)]
 
-        self.critic_target = Critic(state_size, action_size, random_seed, fcs1_units=600, fc2_units=400,
-                                    fc3_units=100).to(device)
+        self.critic_target = [Critic(state_size, action_size, random_seed, fcs1_units=600, fc2_units=400,
+                                     fc3_units=100).to(device) for i in range(num_parallel_agents)]
 
-        self.critic_optimizer = optim.Adam(self.critic_local.parameters(), lr=self.lr_critic, weight_decay=self.weight_decay)
+        self.critic_optimizer = [
+            optim.Adam(self.critic_local[i].parameters(), lr=self.lr_critic, weight_decay=self.weight_decay) for i in
+            range(num_parallel_agents)]
 
         # To ensure local and target models have the same weights as required by DDPG
         # This step was forgotten by the Udacity guys.
         # See https://knowledge.udacity.com/questions/98687
         if make_local_target_weights_equal_at_init:
-            self.soft_update(self.actor_local,self.actor_target,1.0)
-            self.soft_update(self.critic_local, self.critic_target, 1.0)
+            for i in range(num_parallel_agents):
+                self.soft_update(self.actor_local[i], self.actor_target[i], 1.0)
+                self.soft_update(self.critic_local[i], self.critic_target[i], 1.0)
         # Noise process
         self.noise_variance = NOISE_VARIANCE
         self.noise = OUNoise(action_size, random_seed)
@@ -101,21 +107,25 @@ class Agent():
 
         # Learn, if enough samples are available in memory
         if len(self.memory) > self.batch_size and i_agent == (self.num_parallel_agents - 1):
-            num_trainings = self.num_trainings_per_update * (int(i_episode / self.num_episodes_to_increase_num_trainings) + 1)
-            for i in range(num_trainings):
+            num_trainings = self.num_trainings_per_update * (
+                    int(i_episode / self.num_episodes_to_increase_num_trainings) + 1)
+            for i_training in range(num_trainings):
                 experiences = self.memory.sample()
-                self.learn(experiences, GAMMA)
-                if DEBUG:
-                    print(f"\rTraining. i_agent: {i_agent}, i_episode: {i_episode}, time_step: {time_step}, i_training: {i}",end="")
-                    time.sleep(0.1)
+                for i_agent in range(self.num_parallel_agents):
+                    self.learn(experiences, GAMMA, i_agent=i_agent)
+                    if DEBUG:
+                        print(
+                            f"\rTraining. i_agent: {i_agent}, i_episode: {i_episode}, time_step: {time_step}, i_training: {i}",
+                            end="")
+                        time.sleep(0.1)
 
-    def act(self, state, add_noise=True):
+    def act(self, state, i_agent, add_noise=True):
         """Returns actions for given state as per current policy."""
         state = torch.from_numpy(state).float().to(device)
-        self.actor_local.eval()
+        self.actor_local[i_agent].eval()
         with torch.no_grad():
-            action = self.actor_local(state).cpu().data.numpy()
-        self.actor_local.train()
+            action = self.actor_local[i_agent](state).cpu().data.numpy()
+        self.actor_local[i_agent].train()
         if add_noise:
             self.noise_variance = self.noise_variance * self.noise_decay
             action += self.noise_variance * self.noise.sample()
@@ -125,7 +135,7 @@ class Agent():
         self.noise_variance = NOISE_VARIANCE
         self.noise.reset()
 
-    def learn(self, experiences, gamma):
+    def learn(self, experiences, gamma, i_agent):
         """Update policy and value parameters using given batch of experience tuples.
         Q_targets = r + γ * critic_target(next_state, actor_target(next_state))
         where:
@@ -141,32 +151,32 @@ class Agent():
 
         # ---------------------------- update critic ---------------------------- #
         # Get predicted next-state actions and Q values from target models
-        actions_next = self.actor_target(next_states)
-        Q_targets_next = self.critic_target(next_states, actions_next)
+        actions_next = self.actor_target[i_agent](next_states)
+        Q_targets_next = self.critic_target[i_agent](next_states, actions_next)
         # Compute Q targets for current states (y_i)
         Q_targets = rewards + (gamma * Q_targets_next * (1 - dones))
         # Compute critic loss
-        Q_expected = self.critic_local(states, actions)
+        Q_expected = self.critic_local[i_agent](states, actions)
         critic_loss = F.mse_loss(Q_expected, Q_targets)
         # Minimize the loss
-        self.critic_optimizer.zero_grad()
+        self.critic_optimizer[i_agent].zero_grad()
         critic_loss.backward()
         if self.clip_grad_norm:
-            torch.nn.utils.clip_grad_norm_(self.critic_local.parameters(), 1)
-        self.critic_optimizer.step()
+            torch.nn.utils.clip_grad_norm_(self.critic_local[i_agent].parameters(), 1)
+        self.critic_optimizer[i_agent].step()
 
         # ---------------------------- update actor ---------------------------- #
         # Compute actor loss
-        actions_pred = self.actor_local(states)
-        actor_loss = -self.critic_local(states, actions_pred).mean()
+        actions_pred = self.actor_local[i_agent](states)
+        actor_loss = -self.critic_local[i_agent](states, actions_pred).mean()
         # Minimize the loss
-        self.actor_optimizer.zero_grad()
+        self.actor_optimizer[i_agent].zero_grad()
         actor_loss.backward()
-        self.actor_optimizer.step()
+        self.actor_optimizer[i_agent].step()
 
         # ----------------------- update target networks ----------------------- #
-        self.soft_update(self.critic_local, self.critic_target, TAU)
-        self.soft_update(self.actor_local, self.actor_target, TAU)
+        self.soft_update(self.critic_local[i_agent], self.critic_target[i_agent], TAU)
+        self.soft_update(self.actor_local[i_agent], self.actor_target[i_agent], TAU)
 
     def soft_update(self, local_model, target_model, tau):
         """Soft update model parameters.

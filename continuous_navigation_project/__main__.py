@@ -69,14 +69,14 @@ def ddpg(agent, n_episodes=1000, max_t=300, print_every=100):
     episode_durations = []
     global_start_time = time.time()
     for i_episode in range(1, n_episodes + 1):
-        start_time = time.time()
+        episode_start_time = time.time()
         env_info = env.reset(train_mode=True)[brain_name]
         num_agents = len(env_info.rewards)
         states = env_info.vector_observations
         agent.reset()
         episode_score_per_agent = np.zeros(num_agents)
         for t in range(max_t):
-            actions = agent.act(states)
+            actions = [agent.act(states[i_agent], i_agent) for i_agent in range(num_agents)]
             env_info = env.step(actions)[brain_name]  # send the action to the environment
             next_states = env_info.vector_observations  # get the next state
             rewards = env_info.rewards  # get the reward
@@ -104,8 +104,8 @@ def ddpg(agent, n_episodes=1000, max_t=300, print_every=100):
               'Duration: {:.1f}s'.format(i_episode,
                                          mean_episode_score_deque[-1],
                                          episode_durations[-1]), end="")
-        torch.save(agent.actor_local.state_dict(), 'checkpoint_actor.pth')
-        torch.save(agent.critic_local.state_dict(), 'checkpoint_critic.pth')
+        torch.save(agent.actor_local[0].state_dict(), 'checkpoint_actor.pth')
+        torch.save(agent.critic_local[0].state_dict(), 'checkpoint_critic.pth')
         if i_episode % print_every == 0:
             print(
                 '\rEpisode {}\tAverage mean agent Score: {:.2f}. Average duration {:.1f}s. Averages over last {} episodes.'.format(
