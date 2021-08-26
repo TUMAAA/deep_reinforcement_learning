@@ -48,7 +48,7 @@ def generate_training_plots(scores_global, episode_durations, attributes):
     plt.ylim(0, max_y)
     grid_step = 10
     ax.set_yticks(range(10, max_y, grid_step), minor=False)
-    ax.yaxis.grid(True,which="major")
+    ax.yaxis.grid(True, which="major")
 
     ax = fig.add_subplot(414)
     num_episodes = len(episode_durations)
@@ -67,6 +67,7 @@ def ddpg(agent, n_episodes=1000, max_t=300, print_every=100):
     mean_episode_score_deque = deque(maxlen=print_every)
     scores_global = []
     episode_durations = []
+    global_start_time = time.time()
     for i_episode in range(1, n_episodes + 1):
         start_time = time.time()
         env_info = env.reset(train_mode=True)[brain_name]
@@ -95,7 +96,7 @@ def ddpg(agent, n_episodes=1000, max_t=300, print_every=100):
             episode_score_per_agent += rewards
             if np.any(dones):
                 break
-        episode_durations.append(time.time() - start_time)
+        episode_durations.append(time.time() - episode_start_time)
         mean_episode_score = np.mean(episode_score_per_agent)
         mean_episode_score_deque.append(mean_episode_score)
         scores_global.append(mean_episode_score)
@@ -118,6 +119,9 @@ def ddpg(agent, n_episodes=1000, max_t=300, print_every=100):
                        "trained_models/" + "checkpoint_dropout_p{}_hiddenlayers{}.pth".format(
                            agent.qnetwork_local.drop_p, agent.qnetwork_local.hidden_layers_config))
             break
+    print("")
+    print("DONE ----------------------")
+    print("Total time consumed: {:.1f}m".format((time.time() - global_start_time) / 60.0))
 
     return scores_global, episode_durations
 
@@ -129,7 +133,8 @@ agent = Agent(state_size=state_size, action_size=action_size, random_seed=2, num
               num_episodes_to_increase_num_trainings=120,
               lr_actor=1e-4,
               lr_critic=1e-4,
-              make_local_target_weights_equal_at_init=True)
+              make_local_target_weights_equal_at_init=True,
+              clip_grad_norm=False)
 if load_pretrained_model:
     agent.actor_local.load_state_dict(torch.load("checkpoint_actor.pth"))
     agent.actor_target.load_state_dict(torch.load("checkpoint_actor.pth"))
@@ -143,9 +148,11 @@ generate_training_plots(scores_global, episode_durations,
                          "actor": agent.actor_local.__repr__(),
                          "critic_optim": agent.critic_optimizer.__repr__().replace("\n", ", "),
                          "actor_optim": agent.actor_optimizer.__repr__().replace("\n", ", "),
+                         "clip_grad_norm": agent.clip_grad_norm,
                          "batch_size": agent.batch_size,
                          "max_t": MAX_TIMESTEPS_PER_EPISODE,
                          "time_steps_before_training": agent.time_steps_before_training,
                          "num_trainings_per_update": agent.num_trainings_per_update,
                          "num_episodes_to_increase_num_trainings": agent.num_episodes_to_increase_num_trainings,
-                         "noise_decay": agent.noise_decay})
+                         "noise_decay": agent.noise_decay
+                         })

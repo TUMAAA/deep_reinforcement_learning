@@ -36,7 +36,8 @@ class Agent():
                  noise_decay=1e-6,
                  num_episodes_to_increase_num_trainings=150,
                  make_local_target_weights_equal_at_init=False,
-                 weight_decay=0.0):
+                 weight_decay=0.0,
+                 clip_grad_norm=False):
         """Initialize an Agent object.
 
         Params
@@ -45,6 +46,7 @@ class Agent():
             action_size (int): dimension of each action
             random_seed (int): random seed
         """
+        self.clip_grad_norm = clip_grad_norm
         self.weight_decay = weight_decay
         self.lr_actor = lr_actor
         self.lr_critic = lr_critic
@@ -149,7 +151,8 @@ class Agent():
         # Minimize the loss
         self.critic_optimizer.zero_grad()
         critic_loss.backward()
-        torch.nn.utils.clip_grad_norm_(self.critic_local.parameters(), 1)
+        if self.clip_grad_norm:
+            torch.nn.utils.clip_grad_norm_(self.critic_local.parameters(), 1)
         self.critic_optimizer.step()
 
         # ---------------------------- update actor ---------------------------- #
