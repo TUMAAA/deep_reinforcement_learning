@@ -5,5 +5,8 @@ __pycache__
 venv
 unity-environment.log
 .idea
-
-
+.dll
+.so
+UnityEngine*
+*.aspx
+continuous_navigation_project/Reacher_Twenty_Linux_NoVis/Reacher_Data/*
