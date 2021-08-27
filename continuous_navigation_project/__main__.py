@@ -149,7 +149,7 @@ if load_pretrained_model:
 episodes_to_make_target_equal_to_local = 5
 max_timesteps_per_episode = 1000
 scores_global, episode_durations = ddpg(agent=agent,
-                                        n_episodes=180,
+                                        n_episodes=130,
                                         max_t=max_timesteps_per_episode,
                                         print_every=20,
                                         episodes_to_make_target_equal_to_local=episodes_to_make_target_equal_to_local)
