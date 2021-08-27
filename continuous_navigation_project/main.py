@@ -4,25 +4,24 @@ import time
 import matplotlib.pyplot as plt
 from collections import deque
 import torch
+import os
 
 from continuous_navigation_project.agent import Agent
 
 MIN_AVG_SCORE_OVER_LAST_HUNDRED_EPISODES_TO_BEAT = 30.0
+TRAINED_MODELS_DIR = "trained_models"
 
 env = UnityEnvironment(file_name='Reacher_Twenty_Linux_NoVis/Reacher.x86_64')
 brain_name = env.brain_names[0]
 brain = env.brains[brain_name]
 env_info = env.reset(train_mode=True)[brain_name]
 
-# number of agents
 num_agents = len(env_info.agents)
 print('Number of agents:', num_agents)
 
-# size of each action
 action_size = brain.vector_action_space_size
 print('Size of each action:', action_size)
 
-# examine the state space
 states = env_info.vector_observations
 state_size = states.shape[1]
 print('There are {} agents. Each observes a state with length: {}'.format(states.shape[0], state_size))
@@ -30,6 +29,12 @@ print('The state for the first agent looks like:', states[0])
 
 
 def generate_plot_name(attributes: dict):
+    """
+    Generates a title for the plots showing the learning curve. The title encodes the used configuration of the agent.
+    :param attributes: dict of key-values that encode configuration var and its value (e.g. {"max_t":300}).
+        Simply put everything you want to have in the plot title
+    :return: string title
+    """
     title = ""
     for key in attributes.keys():
         title += "{} {}\n".format(key, attributes[key])
@@ -38,13 +43,19 @@ def generate_plot_name(attributes: dict):
 
 
 def generate_training_plots(scores_global, episode_durations, attributes):
+    """
+    Generates subplots showing the mean score and training duration per episode
+    :param scores_global: List of mean scores where each element represents an episode
+    :param episode_durations: List of episode duration where each element represents an episode
+    :param attributes: A dict where each key-value pair gets converted to a string added to the plot title
+    """
     fig = plt.figure()
     ax = fig.add_subplot(413)
     plt.plot(np.arange(1, len(scores_global) + 1), scores_global)
     plt.ylabel('Accum Rewards (Score)')
     plt.xlabel('Episode #')
     max_y = np.max(scores_global)
-    max_y = (int(max_y / 10) + 1)*10
+    max_y = (int(max_y / 10) + 1) * 10
     plt.ylim(0, max_y)
     grid_step = 10
     ax.set_yticks(range(10, max_y, grid_step), minor=False)
@@ -60,10 +71,21 @@ def generate_training_plots(scores_global, episode_durations, attributes):
     plt.show()
 
 
-load_pretrained_model = False
-
-
-def ddpg(agent, n_episodes=1000, max_t=300, print_every=100, episodes_to_make_target_equal_to_local=10):
+def ddpg(agent,
+         n_episodes=1000,
+         max_t=1000,
+         print_every=100,
+         episodes_to_make_target_equal_to_local=10):
+    """
+    Runs the DDPG algorithm on the given agent to solve the challenge
+    :param agent: A DDPG actor-critic agent with local and target models for actor and critic
+    :param n_episodes: Max number of episodes to run to try to solve the challenge
+    :param max_t: Maximum number of timesteps per episode (the higher the better)
+    :param print_every: The number of episodes for which a checkpoint is saved and the mean scores are averaged
+    :param episodes_to_make_target_equal_to_local: The target models are set to the local models every time the episde
+            index is a multiple of this (set very high if you don't want that and want to rely on soft update only).
+    :return: A tuple of a list of mean agent score per episode and a list of episode duration
+    """
     mean_episode_score_deque = deque(maxlen=print_every)
     scores_global = []
     episode_durations = []
@@ -109,26 +131,31 @@ def ddpg(agent, n_episodes=1000, max_t=300, print_every=100, episodes_to_make_ta
               'Duration: {:.1f}s'.format(i_episode,
                                          mean_episode_score_deque[-1],
                                          episode_durations[-1]), end="")
-        torch.save(agent.actor_local.state_dict(), 'checkpoint_actor.pth')
-        torch.save(agent.critic_local.state_dict(), 'checkpoint_critic.pth')
+        save_checkpoints(agent)
         if i_episode % print_every == 0:
             print(
                 '\rEpisode {}\tAverage mean agent Score: {:.2f}. Average duration {:.1f}s. Averages over last {} episodes.'.format(
                     i_episode, np.mean(mean_episode_score_deque), np.mean(episode_durations[-print_every:]),
                     print_every))
         if np.mean(scores_global[-100:]) >= MIN_AVG_SCORE_OVER_LAST_HUNDRED_EPISODES_TO_BEAT:
-            print('\nEnvironment solved in {:d} episodes!\tAverage mean score: {:.2f}'.format(i_episode - 100,
-                                                                                              np.mean(scores_global[
-                                                                                                      -100:])))
-            torch.save(agent.qnetwork_local.state_dict(),
-                       "trained_models/" + "checkpoint_dropout_p{}_hiddenlayers{}.pth".format(
-                           agent.qnetwork_local.drop_p, agent.qnetwork_local.hidden_layers_config))
+            print('\nEnvironment solved in {:d} episodes!\tAverage mean score over last 100 episodes: {:.2f}'
+                  .format(i_episode - 100, np.mean(scores_global[-100:])))
+            save_checkpoints()
             break
     print("")
     print("DONE ----------------------")
     print("Total time consumed: {:.1f}m".format((time.time() - global_start_time) / 60.0))
 
     return scores_global, episode_durations
+
+
+def save_checkpoints(agent):
+    """
+    saves a checkpoint of the models of the agent
+    :param agent: continuous navigation agent that has a local and target actor and a local and target critic
+    """
+    torch.save(agent.actor_local.state_dict(), os.path.join(TRAINED_MODELS_DIR, 'checkpoint_actor.pth'))
+    torch.save(agent.critic_local.state_dict(), os.path.join(TRAINED_MODELS_DIR, 'checkpoint_critic.pth'))
 
 
 agent = Agent(state_size=state_size, action_size=action_size, random_seed=2, num_parallel_agents=num_agents,
@@ -140,12 +167,6 @@ agent = Agent(state_size=state_size, action_size=action_size, random_seed=2, num
               lr_critic=1e-4,
               make_local_target_weights_equal_at_init=True,
               clip_grad_norm=False)
-if load_pretrained_model:
-    agent.actor_local.load_state_dict(torch.load("checkpoint_actor.pth"))
-    agent.actor_target.load_state_dict(torch.load("checkpoint_actor.pth"))
-    agent.actor_local.load_state_dict(torch.load("checkpoint_actor.pth"))
-    agent.critic_target.load_state_dict(torch.load("checkpoint_critic.pth"))
-    agent.critic_local.load_state_dict(torch.load("checkpoint_critic.pth"))
 
 episodes_to_make_target_equal_to_local = 5
 max_timesteps_per_episode = 1000
