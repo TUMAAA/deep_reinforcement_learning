@@ -1,3 +1,7 @@
+###############################################
+# To get the python environment set up properly follow the instructions in the notebook Continuous_Control.ipynb
+###############################################
+
 import matplotlib.pyplot as plt
 import numpy as np
 
