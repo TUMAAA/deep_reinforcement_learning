@@ -43,7 +43,8 @@ def generate_training_plots(scores_global, episode_durations, attributes):
     plt.plot(np.arange(1, len(scores_global) + 1), scores_global)
     plt.ylabel('Accum Rewards (Score)')
     plt.xlabel('Episode #')
-    max_y = 30
+    max_y = np.max(scores_global)
+    max_y = (int(max_y / 10) + 1)*10
     plt.ylim(0, max_y)
     grid_step = 10
     ax.set_yticks(range(10, max_y, grid_step), minor=False)
