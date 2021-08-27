@@ -140,7 +140,7 @@ def ddpg(agent,
         if np.mean(scores_global[-100:]) >= MIN_AVG_SCORE_OVER_LAST_HUNDRED_EPISODES_TO_BEAT:
             print('\nEnvironment solved in {:d} episodes!\tAverage mean score over last 100 episodes: {:.2f}'
                   .format(i_episode - 100, np.mean(scores_global[-100:])))
-            save_checkpoints()
+            save_checkpoints(agent)
             break
     print("")
     print("DONE ----------------------")
