@@ -38,11 +38,11 @@ They include setting up the python environment with dependencies and the Unity e
 ## Instructions
 Make sure to run the Jupyter Notebook server from the repository root. This way the needed packaged "module" can be imported.
 
-To train the agent simply follow the instructions inside the Continuous_Navigation.ipynb.
+To train the agent simply follow the instructions inside the Continuous_Navigation.ipynb. 
 
 ## Sample output
 The Report.html is a report showing the results obtained when solving the challenge.
-The trained agent checkpoint files are found under [trained_models/]
+The trained agent checkpoint files are found under [trained_models/](trained_models)
 
 ## Implemented Solution and Lessons Learnt
 We use the multi-agent environment explained above. However, there is only one policy trained which interacts with all environments to collect experiences.
