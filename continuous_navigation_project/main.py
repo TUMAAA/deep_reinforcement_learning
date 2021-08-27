@@ -63,7 +63,7 @@ episodes_to_make_target_equal_to_local = 5
 max_timesteps_per_episode = 1000
 scores_global, episode_durations = ddpg(agent=agent,
                                         n_episodes=130,
-                                        max_t=1000,
+                                        max_t=max_timesteps_per_episode,
                                         print_every=20,
                                         episodes_to_make_target_equal_to_local=5)
 generate_training_plots(scores_global, episode_durations,
