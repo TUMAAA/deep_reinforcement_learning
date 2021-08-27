@@ -1,6 +1,6 @@
 from unityagents import UnityEnvironment
 
-env = UnityEnvironment(file_name='continuous_navigation_project/Reacher_Twenty_Linux_NoVis/Reacher.x86_64')
+env = UnityEnvironment(file_name='Reacher_Twenty_Linux_NoVis/Reacher.x86_64')
 
 print("\n\n---------------------\nEnvironment successfully started")
 brain_name = env.brain_names[0]
