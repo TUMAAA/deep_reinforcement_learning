@@ -42,6 +42,7 @@ To train the agent simply follow the instructions inside the Continuous_Navigati
 
 ## Sample output
 The Report.html is a report showing the results obtained when solving the challenge.
+The trained agent checkpoint files are found under [trained_models/]
 
 ## Implemented Solution and Lessons Learnt
 We use the multi-agent environment explained above. However, there is only one policy trained which interacts with all environments to collect experiences.
