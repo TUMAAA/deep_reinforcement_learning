@@ -65,7 +65,7 @@ In solving the challenge different ideas were tested. They are listed below:
 For idea 3 it is worth mentioning that this also ensures setting the target model params equal to the local params at initialization.
 This step is part of the original DDPG algorithm and forgotten in the reference code by Udacity as nicely pointed out by one of the course participants in the [forum](https://knowledge.udacity.com/questions/98687).
 
-We also implemented one policy per agent. The implementation was not tested thoroughly. It is in the branch
+We also implemented one policy per agent. The implementation was not tested thoroughly. It is in the branch multi_agent_multi_policy
  
 ## Final notes
 The submitted code builds upon the baseline notebooks and python files provided by Udacity.
