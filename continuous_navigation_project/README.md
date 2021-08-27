@@ -47,7 +47,23 @@ The trained agent checkpoint files are found under [trained_models/](trained_mod
 ## Implemented Solution and Lessons Learnt
 We use the multi-agent environment explained above. However, there is only one policy trained which interacts with all environments to collect experiences.
 
-The algorithm is described in the pseudo code below
+As an algorithm we use Deep Deterministic Policy Gradient (DDPG). While sometimes referred to as an Actor-Critic method it is distinctly different in that 
+the actor does not compute a probability distribution over the action space but rather outputs a discrete action value being
+its prediction of the action that would maximize the action-value function Q(s,a). The critic validates this choice. Concretely,
+it is used as cost function with which the actor network is trained. Hence, the higher the expected returns (as estimated in Q(s,a)) is
+the higher the selected action is reinforced and vice versa.
+
+Similar in DQN (Deep Q-Network) a pair of networks is used for each predictor, namely local_actor and target_actor as well as
+local_critic and target_critic. The target networks are kept fairly fixed and updated slowly whereas the local networks are trained to match the targets.
+
+In performing DDPG the following steps have to be performed:
+- predict the best action to chose a_{predictedTarget} using the **target_actor** network
+- determine the TD error in Q function by computing reward + \gamma*Q_{target}(s_{next},a_{preditedTarget})-Q_{local}(s,a_{predictedTarget}) 
+and using this as loss function for the **local_critic** to improve its predictability.
+- use the Q_{local}(s,a_{predictedLocal}) where a_{predictedLocal} is the predicted best action by **local_actor** as cost function for updating the local_actor
+- finally, blend in a fraction of local model weights into their target peers.
+
+A more formal explanation of the algorithm is described in the pseudo code below
 
 ![pseudo-code](algorithm.png)
 
