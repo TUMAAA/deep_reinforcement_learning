@@ -71,18 +71,18 @@ def run_maddpg(agent,
             if np.any(dones):
                 break
         episode_durations.append(time.time() - episode_start_time)
-        mean_episode_score = np.mean(episode_score_per_agent)
-        mean_episode_score_deque.append(mean_episode_score)
-        scores_global.append(mean_episode_score)
+        max_episode_score = np.max(episode_score_per_agent)
+        max_episode_score_deque.append(max_episode_score)
+        scores_global.append(max_episode_score)
         print('\rEpisode {}\tMean (over agents) episode score: {:.2f}. '
               'Duration: {:.1f}s'.format(i_episode,
-                                         mean_episode_score_deque[-1],
+                                         max_episode_score_deque[-1],
                                          episode_durations[-1]), end="")
         save_checkpoints(agent)
         if i_episode % print_every == 0:
             print(
                 '\rEpisode {}\tAverage mean agent Score: {:.2f}. Average duration {:.1f}s. Averages over last {} episodes.'.format(
-                    i_episode, np.mean(mean_episode_score_deque), np.mean(episode_durations[-print_every:]),
+                    i_episode, np.mean(max_episode_score_deque), np.mean(episode_durations[-print_every:]),
                     print_every))
 
         if np.mean(scores_global[-EPISODE_LENGTH_FOR_AVERAGING:]) >= MIN_AVG_SCORE_OVER_LAST_HUNDRED_EPISODES_TO_BEAT:
