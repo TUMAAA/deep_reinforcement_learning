@@ -180,10 +180,10 @@ class Agent():
             if self.clip_grad_norm:
                 torch.nn.utils.clip_grad_norm_(self.critics_local[i].parameters(), max_norm=self.clip_grad_norm_value)
             self.critic_optimizers[i].step()
-        if self.debug:
-            with torch.no_grad():
-                print("Q value according to critics_local: {}".format([self.critics_local[i](joint_states_batch, joint_actions_batch) for i in
-                 range(self.num_competing_agents)]))
+        # if self.debug:
+        #     with torch.no_grad():
+        #         print("Q value according to critics_local: {}".format([self.critics_local[i](joint_states_batch, joint_actions_batch) for i in
+        #          range(self.num_competing_agents)]))
 
         # ---------------------------- update actor ---------------------------- #
         # Compute actor loss
