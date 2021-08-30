@@ -31,16 +31,16 @@ def generate_training_plots(scores_global, episode_durations, attributes):
     :param episode_durations: List of episode duration where each element represents an episode
     :param attributes: A dict where each key-value pair gets converted to a string added to the plot title
     """
-    fig = plt.figure()
-    ax_score = fig.add_subplot(413)
+    fig = plt.figure(figsize=[8, 12])
+    ax_score = fig.add_subplot(412)
     plt.plot(np.arange(1, len(scores_global) + 1), scores_global)
     plt.ylabel('Accum Rewards (Score)')
     plt.xlabel('Episode #')
     max_y = np.max(scores_global)
-    max_y = (int(max_y / 10) + 1) * 10
+    max_y = (int(max_y / 1) + 1) * 1
     plt.ylim(0, max_y)
-    grid_step = 10
-    ax_score.set_yticks(range(10, max_y, grid_step), minor=False)
+    # grid_step = 0.2
+    # ax_score.set_yticks(np.linspace(1, max_y, grid_step), minor=False)
     ax_score.yaxis.grid(True, which="major")
 
     ax_duration = fig.add_subplot(414)
@@ -48,8 +48,9 @@ def generate_training_plots(scores_global, episode_durations, attributes):
     plt.plot(np.arange(1, num_episodes + 1), episode_durations)
     plt.ylabel('Training Duration [s]')
     plt.xlabel('Episode #')
+
     title = generate_plot_name(attributes)
-    fig.suptitle(title, fontsize=7)
+    fig.suptitle(title, fontsize=8)
     plt.show()
 
 batch_size = 128
@@ -70,22 +71,23 @@ agent = Agent(device=device,
               lr_actor=1e-3,
               lr_critic=1e-3,
               clip_grad_norm=False,
-              replay_buffer=replay_buffer)
+              replay_buffer=replay_buffer,
+              debug=True)
 
 episodes_to_make_target_equal_to_local = 200
 max_timesteps_per_episode = 8000
 
 scores_global, episode_durations = run_maddpg(agent=agent,
-                                        n_episodes=5000,
+                                        n_episodes=20,
                                         max_t=max_timesteps_per_episode,
                                         print_every=20,
                                         episodes_to_make_target_equal_to_local=episodes_to_make_target_equal_to_local)
 
 generate_training_plots(scores_global, episode_durations,
-                        {"critic": agent.critic_local.__repr__(),
-                         "actor": agent.actor_local.__repr__(),
-                         "critic_optim": agent.critic_optimizer.__repr__().replace("\n", ", "),
-                         "actor_optim": agent.actor_optimizer.__repr__().replace("\n", ", "),
+                        {"critic": agent.critics_local[0].__repr__(),
+                         "actor": agent.actors_local[0].__repr__(),
+                         "critic_optim": agent.critic_optimizers[0].__repr__().replace("\n", ", "),
+                         "actor_optim": agent.actor_optimizers[0].__repr__().replace("\n", ", "),
                          "clip_grad_norm": agent.clip_grad_norm,
                          "batch_size": agent.batch_size,
                          "max_t": episodes_to_make_target_equal_to_local,

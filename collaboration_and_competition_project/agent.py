@@ -11,7 +11,6 @@ import time
 
 from .model import Actor, Critic
 
-DEBUG = False
 GAMMA = 0.99  # discount factor to compute discounted returns
 TAU = 1e-3  # for soft update of target parameters
 NOISE_VARIANCE = 1.0
@@ -35,7 +34,8 @@ class Agent():
                  noise_decay=1e-6,
                  num_episodes_to_increase_num_trainings=150,
                  weight_decay=0.0,
-                 clip_grad_norm=False):
+                 clip_grad_norm=False,
+                 debug=False):
         """Initialize an Agent object.
 
         Params
@@ -44,6 +44,7 @@ class Agent():
             action_size (int): dimension of each action
             random_seed (int): random seed
         """
+        self.debug = debug
         self.device = device
         self.clip_grad_norm = clip_grad_norm
         self.weight_decay = weight_decay
@@ -111,11 +112,6 @@ class Agent():
             for i in range(num_trainings):
                 joint_experiences_batch = self.memory.sample()
                 self.learn(joint_experiences_batch, GAMMA)
-                if DEBUG:
-                    print(
-                        f"\rTraining. i_episode: {i_episode}, time_step: {time_step}",
-                        end="")
-                    time.sleep(0.1)
 
     def act(self, state, i_agent, add_noise=True):
         """Returns actions for given state as per current policy."""
@@ -126,6 +122,8 @@ class Agent():
         self.actors_local[i_agent].train()
         if add_noise:
             self.noise_variance = self.noise_variance * self.noise_decay
+            if self.debug:
+                print("\ragent {} action: {}. Norm: {}".format(i_agent,action,np.linalg.norm(action)),end="\n")
             action += self.noise_variance * self.noise.sample()
         return np.clip(action, -1, 1)
 
