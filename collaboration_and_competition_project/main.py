@@ -106,9 +106,10 @@ for config in configs:
                   lr_actor=config.lr_actor,
                   lr_critic=config.lr_critic,
                   clip_grad_norm=config.clip_grad_norm,
+                  start_noise_variance = config.start_noise_variance,
                   replay_buffer=replay_buffer,
                   debug=False)
-
+    print("Trying out config: {}".format(config))
     scores_global, episode_durations, episode_timestep_reached = run_maddpg(agent=agent,
                                                                             n_episodes=1300,
                                                                             max_t=int(config.max_t),
