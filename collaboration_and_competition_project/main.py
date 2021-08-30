@@ -31,16 +31,16 @@ def generate_training_plots(scores_global, episode_durations, episode_timestep_r
     :param episode_durations: List of episode duration where each element represents an episode
     :param attributes: A dict where each key-value pair gets converted to a string added to the plot title
     """
-    fig = plt.figure(figsize=[8,12])
+    fig = plt.figure(figsize=[8, 12])
     ax_score = fig.add_subplot(412)
     plt.plot(np.arange(1, len(scores_global) + 1), scores_global)
     plt.ylabel('Accum Rewards (Score)')
     plt.xlabel('Episode #')
     max_y = np.max(scores_global)
-    max_y = (int(max_y / 2) + 1) * 2
+    max_y = (int(max_y / 1) + 1) * 1
     plt.ylim(0, max_y)
-    grid_step = 10
-    ax_score.set_yticks(range(10, max_y, grid_step), minor=False)
+    # grid_step = 0.2
+    # ax_score.set_yticks(np.linspace(1, max_y, grid_step), minor=False)
     ax_score.yaxis.grid(True, which="major")
 
     ax_ts_reached = fig.add_subplot(413)
