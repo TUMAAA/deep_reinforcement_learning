@@ -35,6 +35,7 @@ class Agent():
                  num_episodes_to_increase_num_trainings=150,
                  weight_decay=0.0,
                  clip_grad_norm=False,
+                 clip_grad_norm_value = 0.1,
                  debug=False):
         """Initialize an Agent object.
 
@@ -44,6 +45,7 @@ class Agent():
             action_size (int): dimension of each action
             random_seed (int): random seed
         """
+        self.clip_grad_norm_value = clip_grad_norm_value
         self.debug = debug
         self.device = device
         self.clip_grad_norm = clip_grad_norm
@@ -171,7 +173,7 @@ class Agent():
             self.critic_optimizers[i].zero_grad()
             critics_losses[i].backward(retain_graph=True)
             if self.clip_grad_norm:
-                torch.nn.utils.clip_grad_norm_(self.critics_local[i].parameters(), 1)
+                torch.nn.utils.clip_grad_norm_(self.critics_local[i].parameters(), max_norm=self.clip_grad_norm_value)
             self.critic_optimizers[i].step()
         if self.debug:
             with torch.no_grad():
@@ -190,6 +192,8 @@ class Agent():
         for i in range(self.num_competing_agents):
             self.actor_optimizers[i].zero_grad()
             actors_losses[i].backward(retain_graph=True)
+            if self.clip_grad_norm:
+                torch.nn.utils.clip_grad_norm_(self.actors_local[i].parameters(), max_norm=self.clip_grad_norm_value)
             self.actor_optimizers[i].step()
 
 
