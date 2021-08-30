@@ -31,7 +31,7 @@ class Agent():
                  lr_critic=1e-4,
                  time_steps_before_training=20,
                  num_trainings_per_update=1,
-                 noise_decay=1e-6,
+                 noise_decay=1.0-1e-6,
                  num_episodes_to_increase_num_trainings=150,
                  weight_decay=0.0,
                  clip_grad_norm=False,
@@ -112,11 +112,6 @@ class Agent():
             for i in range(num_trainings):
                 joint_experiences_batch = self.memory.sample()
                 self.learn(joint_experiences_batch, GAMMA)
-                if DEBUG:
-                    print(
-                        f"\rTraining. i_episode: {i_episode}, time_step: {time_step}",
-                        end="")
-                    time.sleep(0.1)
 
     def act(self, state, i_agent, add_noise=True):
         """Returns actions for given state as per current policy."""
