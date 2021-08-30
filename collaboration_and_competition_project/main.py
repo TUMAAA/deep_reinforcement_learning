@@ -72,6 +72,7 @@ TrainingConfig = namedtuple(typename="TrainingConfig", field_names=["max_t",
                                                                     "clip_grad_norm",
                                                                     "lr_actor",
                                                                     "lr_critic",
+                                                                    "start_noise_variance",
                                                                     "episodes_to_make_target_equal_to_local"])
 
 configs = [
@@ -116,17 +117,19 @@ for config in configs:
                                                                             print_every=20,
                                                                             episodes_to_make_target_equal_to_local=config.episodes_to_make_target_equal_to_local)
 
+    details_dict = {"critic": agent.critics_local[0].__repr__(),
+                    "actor": agent.actors_local[0].__repr__(),
+                    "critic_optim": agent.critic_optimizers[0].__repr__().replace("\n", ", "),
+                    "actor_optim": agent.actor_optimizers[0].__repr__().replace("\n", ", "),
+                    "clip_grad_norm": agent.clip_grad_norm,
+                    "batch_size": agent.batch_size,
+                    "max_t": config.max_t,
+                    "time_steps_before_training": agent.time_steps_before_training,
+                    "num_trainings_per_update": agent.num_trainings_per_update,
+                    "num_episodes_to_increase_num_trainings": agent.num_episodes_to_increase_num_trainings,
+                    "start_noise_variance": agent.start_noise_variance,
+                    "noise_decay": agent.noise_decay,
+                    "episodes_to_make_target_equal_to_local": config.episodes_to_make_target_equal_to_local
+                    }
     generate_training_plots(scores_global, episode_durations, episode_timestep_reached,
-                            {"critic": agent.critics_local[0].__repr__(),
-                             "actor": agent.actors_local[0].__repr__(),
-                             "critic_optim": agent.critic_optimizers[0].__repr__().replace("\n", ", "),
-                             "actor_optim": agent.actor_optimizers[0].__repr__().replace("\n", ", "),
-                             "clip_grad_norm": agent.clip_grad_norm,
-                             "batch_size": agent.batch_size,
-                             "max_t": config.max_t,
-                             "time_steps_before_training": agent.time_steps_before_training,
-                             "num_trainings_per_update": agent.num_trainings_per_update,
-                             "num_episodes_to_increase_num_trainings": agent.num_episodes_to_increase_num_trainings,
-                             "noise_decay": agent.noise_decay,
-                             "episodes_to_make_target_equal_to_local": config.episodes_to_make_target_equal_to_local
-                             })
+                            details_dict)
