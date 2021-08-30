@@ -95,7 +95,6 @@ class Agent():
                                   range(self.num_competing_agents)]
 
         # Noise process
-        self.noise_variance = NOISE_VARIANCE
         self.noise = OUNoise(action_size, random_seed, theta=0.15, sigma=0.05 )
 
         # Replay memory
