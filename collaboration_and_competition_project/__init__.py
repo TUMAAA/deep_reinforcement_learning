@@ -1,9 +1,13 @@
 import torch
 from unityagents import UnityEnvironment
 
+USE_VIS=False
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-env = UnityEnvironment(file_name='Tennis_Linux_NoVis/Tennis.x86_64')
+if USE_VIS:
+    env = UnityEnvironment(file_name='Tennis_Linux/Tennis.x86_64')
+else:
+    env = UnityEnvironment(file_name='Tennis_Linux_NoVis/Tennis.x86_64')
 
 print("\n\n---------------------\nEnvironment successfully started")
 brain_name = env.brain_names[0]
