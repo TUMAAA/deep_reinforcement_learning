@@ -83,7 +83,7 @@ def run_maddpg(agent,
         print('\rEpisode {}\tMax (over agents) episode score: {:.2f}. '
               'Duration: {:.1f}s'.format(i_episode,
                                          max_episode_score_deque[-1],
-                                         episode_durations[-1]), end="")
+                                         episode_durations[i_episode-1]), end="")
         save_checkpoints(agent)
         if i_episode % print_every == 0:
             print(
