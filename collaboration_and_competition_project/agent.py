@@ -32,11 +32,12 @@ class Agent():
                  lr_critic=1e-4,
                  time_steps_before_training=20,
                  num_trainings_per_update=1,
+                 start_noise_variance=3,
                  noise_decay=0.997,
                  num_episodes_to_increase_num_trainings=150,
                  weight_decay=0.0,
                  clip_grad_norm=False,
-                 clip_grad_norm_value = 0.1,
+                 clip_grad_norm_value=0.1,
                  debug=False):
         """Initialize an Agent object.
 
@@ -46,6 +47,7 @@ class Agent():
             action_size (int): dimension of each action
             random_seed (int): random seed
         """
+        self.start_noise_variance = start_noise_variance
         self.clip_grad_norm_value = clip_grad_norm_value
         self.debug = debug
         self.device = device
@@ -131,7 +133,7 @@ class Agent():
         return np.clip(action, -1, 1)
 
     def reset(self, i_episode):
-        self.noise_variance = max(START_NOISE_VARIANCE * self.noise_decay ** i_episode, MIN_NOISE_VARIANCE)
+        self.noise_variance = max(self.start_noise_variance * self.noise_decay ** i_episode, MIN_NOISE_VARIANCE)
         if i_episode % 100==0:
             print("\rNoise variance: {}".format(self.noise_variance),end="\n")
             time.sleep(4)
