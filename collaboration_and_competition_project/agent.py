@@ -13,7 +13,8 @@ from .model import Actor, Critic
 
 GAMMA = 0.99  # discount factor to compute discounted returns
 TAU = 1e-3  # for soft update of target parameters
-NOISE_VARIANCE = 1.0
+START_NOISE_VARIANCE = 3.0
+MIN_NOISE_VARIANCE=0.1
 
 
 class Agent():
@@ -31,7 +32,7 @@ class Agent():
                  lr_critic=1e-4,
                  time_steps_before_training=20,
                  num_trainings_per_update=1,
-                 noise_decay=1.0-1e-6,
+                 noise_decay=0.997,
                  num_episodes_to_increase_num_trainings=150,
                  weight_decay=0.0,
                  clip_grad_norm=False,
@@ -93,7 +94,7 @@ class Agent():
 
         # Noise process
         self.noise_variance = NOISE_VARIANCE
-        self.noise = OUNoise(action_size, random_seed)
+        self.noise = OUNoise(action_size, random_seed, theta=0.15, sigma=0.05 )
 
         # Replay memory
         self.memory = replay_buffer
@@ -129,8 +130,11 @@ class Agent():
             action += self.noise_variance * self.noise.sample()
         return np.clip(action, -1, 1)
 
-    def reset(self):
-        self.noise_variance = NOISE_VARIANCE
+    def reset(self, i_episode):
+        self.noise_variance = max(START_NOISE_VARIANCE * self.noise_decay ** i_episode, MIN_NOISE_VARIANCE)
+        if i_episode % 100==0:
+            print("\rNoise variance: {}".format(self.noise_variance),end="\n")
+            time.sleep(4)
         self.noise.reset()
 
     def learn(self, joint_experiences_batch, gamma):
@@ -234,6 +238,6 @@ class OUNoise:
     def sample(self):
         """Update internal state and return it as a noise sample."""
         x = self.state
-        dx = self.theta * (self.mu - x) + self.sigma * np.array([random.gauss(mu=0.0,sigma=0.1) for i in range(len(x))])
+        dx = self.theta * (self.mu - x) + self.sigma * np.random.standard_normal(size=len(x))
         self.state = x + dx
         return self.state
