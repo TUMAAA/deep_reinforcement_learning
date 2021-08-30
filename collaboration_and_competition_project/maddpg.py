@@ -39,7 +39,7 @@ def run_maddpg(agent,
             index is a multiple of this (set very high if you don't want that and want to rely on soft update only).
     :return: A tuple of a list of mean agent score per episode and a list of episode duration
     """
-    mean_episode_score_deque = deque(maxlen=print_every)
+    max_episode_score_deque = deque(maxlen=print_every)
     scores_global = []
     episode_durations = []
     global_start_time = time.time()
@@ -74,14 +74,14 @@ def run_maddpg(agent,
         max_episode_score = np.max(episode_score_per_agent)
         max_episode_score_deque.append(max_episode_score)
         scores_global.append(max_episode_score)
-        print('\rEpisode {}\tMean (over agents) episode score: {:.2f}. '
+        print('\rEpisode {}\tMax (over agents) episode score: {:.2f}. '
               'Duration: {:.1f}s'.format(i_episode,
                                          max_episode_score_deque[-1],
                                          episode_durations[-1]), end="")
         save_checkpoints(agent)
         if i_episode % print_every == 0:
             print(
-                '\rEpisode {}\tAverage mean agent Score: {:.2f}. Average duration {:.1f}s. Averages over last {} episodes.'.format(
+                '\rEpisode {}\tAverage max agent Score: {:.2f}. Average duration {:.1f}s. Averages over last {} episodes.'.format(
                     i_episode, np.mean(max_episode_score_deque), np.mean(episode_durations[-print_every:]),
                     print_every))
 

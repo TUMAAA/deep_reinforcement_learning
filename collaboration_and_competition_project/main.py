@@ -2,13 +2,13 @@ from collaboration_and_competition_project.ReplayBuffer import ReplayBuffer
 
 BUFFER_SIZE = int(1e5)  # replay buffer size # TODO: check value
 
-
 import matplotlib.pyplot as plt
 import numpy as np
 
 from collaboration_and_competition_project import state_size, action_size, num_agents, device
 from collaboration_and_competition_project.agent import Agent
 from collaboration_and_competition_project.maddpg import run_maddpg
+
 
 def generate_plot_name(attributes: dict):
     """
@@ -51,6 +51,7 @@ def generate_training_plots(scores_global, episode_durations, attributes):
     title = generate_plot_name(attributes)
     fig.suptitle(title, fontsize=7)
     plt.show()
+
 
 batch_size = 128
 
