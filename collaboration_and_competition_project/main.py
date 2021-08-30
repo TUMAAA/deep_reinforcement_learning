@@ -53,25 +53,54 @@ def generate_training_plots(scores_global, episode_durations, attributes):
     plt.show()
 
 
-batch_size = 128
+# episodes_to_make_target_equal_to_local = 200
+# max_timesteps_per_episode = 6500
 
-replay_buffer = ReplayBuffer(action_size=action_size,
-                             buffer_size=BUFFER_SIZE,
-                             batch_size=batch_size,
-                             random_seed=2,
-                             num_collaborating_agents=num_agents,
-                             device=device)
+from collections import namedtuple
 
-agent = Agent(device=device,
-              state_size=state_size, action_size=action_size, random_seed=2, num_competing_agents=num_agents,
-              num_trainings_per_update=1,
-              time_steps_before_training=1,
-              batch_size=batch_size,
-              num_episodes_to_increase_num_trainings=180,
-              lr_actor=1e-3,
-              lr_critic=1e-3,
-              clip_grad_norm=False,
-              replay_buffer=replay_buffer)
+TrainingConfig = namedtuple(typename="TrainingConfig", field_names=["max_t",
+                                                                    "batch_size",
+                                                                    "num_trainings_per_update",
+                                                                    "time_steps_before_training",
+                                                                    "clip_grad_norm",
+                                                                    "lr_actor",
+                                                                    "lr_critic",
+                                                                    "episodes_to_make_target_equal_to_local"])
+
+configs = [
+    # Compare effect of LR
+    TrainingConfig(1000, 128, 1, 1, False, 1e-5, 1e-5, 500),
+    TrainingConfig(1000, 128, 1, 1, False, 1e-4, 1e-4, 500),
+    TrainingConfig(1000, 128, 1, 1, False, 1e-3, 1e-3, 500),
+
+    # Compare effect batch size
+    TrainingConfig(1000, 64, 1, 1, False, 1e-4, 1e-4, 500),
+
+    # Compare clip grad norm
+    TrainingConfig(1000, 128, 1, 1, True, 1e-4, 1e-4, 500),
+
+    # Compare num time steps before training
+    TrainingConfig(1000, 128, 1, 3, False, 1e-4, 1e-4, 500),
+]
+for config in configs:
+    replay_buffer = ReplayBuffer(action_size=action_size,
+                                 buffer_size=BUFFER_SIZE,
+                                 batch_size=config.batch_size,
+                                 random_seed=2,
+                                 num_collaborating_agents=num_agents,
+                                 device=device)
+
+    agent = Agent(device=device,
+                  state_size=state_size, action_size=action_size, random_seed=2, num_competing_agents=num_agents,
+                  num_trainings_per_update=config.num_trainings_per_update,
+                  time_steps_before_training=config.time_steps_before_training,
+                  batch_size=config.batch_size,
+                  num_episodes_to_increase_num_trainings=2000,
+                  lr_actor=config.lr_actor,
+                  lr_critic=config.lr_critic,
+                  clip_grad_norm=config.clip_grad_norm,
+                  replay_buffer=replay_buffer,
+                  debug=False)
 
 episodes_to_make_target_equal_to_local = 200
 max_timesteps_per_episode = 8000
