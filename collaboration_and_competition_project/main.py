@@ -72,23 +72,33 @@ TrainingConfig = namedtuple(typename="TrainingConfig", field_names=["max_t",
                                                                     "clip_grad_norm",
                                                                     "lr_actor",
                                                                     "lr_critic",
+                                                                    "weight_decay",
                                                                     "start_noise_variance",
                                                                     "episodes_to_make_target_equal_to_local"])
 
 configs = [
+    # Compare effect start noise variance
+    TrainingConfig(1000, 128, 3, 10, False, 1e-4, 1e-4, 0.01, 1, 1000),
+    TrainingConfig(1000, 128, 3, 10, False, 1e-4, 1e-4, 0.001, 1, 1000),
+    TrainingConfig(1000, 128, 3, 10, False, 1e-4, 1e-4, 0.01, 3, 1000),
+    TrainingConfig(1000, 128, 3, 10, False, 1e-4, 1e-4, 0.001, 3, 1000),
+    TrainingConfig(1000, 128, 3, 10, False, 1e-4, 1e-4, 0.0001, 3, 1000),
+    TrainingConfig(1000, 128, 5, 10, False, 1e-4, 1e-4, 0.0001, 5, 1000),
+    TrainingConfig(1000, 128, 5, 10, False, 1e-4, 1e-4, 0.0001, 7, 1000),
+
     # Compare effect of LR
-    TrainingConfig(1000, 128, 1, 1, False, 1e-5, 1e-5, 500),
-    TrainingConfig(1000, 128, 1, 1, False, 1e-4, 1e-4, 500),
-    TrainingConfig(1000, 128, 1, 1, False, 1e-3, 1e-3, 500),
+    TrainingConfig(1000, 128, 5, 10, False, 1e-5, 1e-5, 0.0001, 3, 1000),
+    TrainingConfig(1000, 128, 5, 10, False, 1e-4, 1e-4, 0.0001, 3, 1000),
+    TrainingConfig(1000, 128, 5, 10, False, 1e-3, 1e-3, 0.0001, 3, 1000),
 
     # Compare effect batch size
-    TrainingConfig(1000, 64, 1, 1, False, 1e-4, 1e-4, 500),
+    TrainingConfig(1000, 64, 5, 10, False, 1e-4, 1e-4, 0.0001, 3, 1000),
 
     # Compare clip grad norm
-    TrainingConfig(1000, 128, 1, 1, True, 1e-4, 1e-4, 500),
+    TrainingConfig(1000, 128, 5, 10, True, 1e-4, 1e-4, 0.0001, 3, 1000),
 
-    # Compare num time steps before training
-    TrainingConfig(1000, 128, 1, 3, False, 1e-4, 1e-4, 500),
+    # Compare num time trainings per update
+    TrainingConfig(1000, 128, 10, 10, False, 1e-4, 1e-4, 0.0001, 3, 1000),
 ]
 for config in configs:
     replay_buffer = ReplayBuffer(action_size=action_size,
@@ -106,6 +116,7 @@ for config in configs:
                   num_episodes_to_increase_num_trainings=2000,
                   lr_actor=config.lr_actor,
                   lr_critic=config.lr_critic,
+                  weight_decay=config.weight_decay,
                   clip_grad_norm=config.clip_grad_norm,
                   start_noise_variance = config.start_noise_variance,
                   replay_buffer=replay_buffer,
