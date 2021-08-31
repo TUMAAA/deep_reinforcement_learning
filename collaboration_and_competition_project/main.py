@@ -70,13 +70,14 @@ replay_buffer = ReplayBuffer(action_size=action_size,
 
 agent = Agent(device=device,
               state_size=state_size, action_size=action_size, random_seed=2, num_competing_agents=num_agents,
-              num_trainings_per_update=1,
-              time_steps_before_training=1,
+              num_trainings_per_update=2,
+              time_steps_before_training=5,
               batch_size=batch_size,
               num_episodes_to_increase_num_trainings=500,
               lr_actor=1e-3,
               lr_critic=1e-3,
-              clip_grad_norm=False,
+              clip_grad_norm=True,
+              weight_decay= 0.0001,
               start_noise_variance = 1.0,
               replay_buffer=replay_buffer,
               add_samples_only_if_high_reward=False,
@@ -86,7 +87,7 @@ agent = Agent(device=device,
 # agent.actors_local[1].load_state_dict(torch.load("trained_models/actor_reaches_0.3_1.pth"))
 # agent.actors_target[1].load_state_dict(torch.load("trained_models/actor_reaches_0.3_1.pth"))
 episodes_to_make_target_equal_to_local = 200
-max_timesteps_per_episode = 400
+max_timesteps_per_episode = 500
 
 scores_global, episode_durations, episode_timestep_reached = run_maddpg(agent=agent,
                                         n_episodes=1500,
