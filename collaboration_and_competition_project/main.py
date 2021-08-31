@@ -59,7 +59,7 @@ def generate_training_plots(scores_global, episode_durations, episode_timestep_r
     fig.suptitle(title, fontsize=8)
     plt.show()
 
-batch_size = 128
+batch_size = 512
 
 replay_buffer = ReplayBuffer(action_size=action_size,
                              buffer_size=BUFFER_SIZE,
@@ -73,7 +73,7 @@ agent = Agent(device=device,
               num_trainings_per_update=1,
               time_steps_before_training=1,
               batch_size=batch_size,
-              num_episodes_to_increase_num_trainings=800,
+              num_episodes_to_increase_num_trainings=500,
               lr_actor=1e-3,
               lr_critic=1e-3,
               clip_grad_norm=False,
@@ -86,10 +86,10 @@ agent = Agent(device=device,
 # agent.actors_local[1].load_state_dict(torch.load("trained_models/actor_reaches_0.3_1.pth"))
 # agent.actors_target[1].load_state_dict(torch.load("trained_models/actor_reaches_0.3_1.pth"))
 episodes_to_make_target_equal_to_local = 200
-max_timesteps_per_episode = 8000
+max_timesteps_per_episode = 400
 
 scores_global, episode_durations, episode_timestep_reached = run_maddpg(agent=agent,
-                                        n_episodes=860,
+                                        n_episodes=1500,
                                         max_t=max_timesteps_per_episode,
                                         print_every=20,
                                         episodes_to_make_target_equal_to_local=episodes_to_make_target_equal_to_local)
