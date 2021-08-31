@@ -3,7 +3,6 @@
 [image1]: https://user-images.githubusercontent.com/10624937/42135623-e770e354-7d12-11e8-998d-29fc74429ca2.gif "Trained Agent"
 [image2]: https://user-images.githubusercontent.com/10624937/42135622-e55fb586-7d12-11e8-8a54-3c31da15a90a.gif "Soccer"
 
-
 # Project 3: Collaboration and Competition
 
 ### Introduction
@@ -23,40 +22,50 @@ The task is episodic, and in order to solve the environment, your agents must ge
 
 The environment is considered solved, when the average (over 100 episodes) of those **scores** is at least +0.5.
 
-### Getting Started
+### Getting started
 
-1. Download the environment from one of the links below.  You need only select the environment that matches your operating system:
-    - Linux: [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P3/Tennis/Tennis_Linux.zip)
-    - Mac OSX: [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P3/Tennis/Tennis.app.zip)
-    - Windows (32-bit): [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P3/Tennis/Tennis_Windows_x86.zip)
-    - Windows (64-bit): [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P3/Tennis/Tennis_Windows_x86_64.zip)
-    
-    (_For Windows users_) Check out [this link](https://support.microsoft.com/en-us/help/827218/how-to-determine-whether-a-computer-is-running-a-32-bit-version-or-64) if you need help with determining if your computer is running a 32-bit version or 64-bit version of the Windows operating system.
+Follow these instructions if you are working locally (you want to setup a Jupyter Notebook locally).
 
-    (_For AWS_) If you'd like to train the agent on AWS (and have not [enabled a virtual screen](https://github.com/Unity-Technologies/ml-agents/blob/master/docs/Training-on-Amazon-Web-Service.md)), then please use [this link](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P3/Tennis/Tennis_Linux_NoVis.zip) to obtain the "headless" version of the environment.  You will **not** be able to watch the agent without enabling a virtual screen, but you will be able to train the agent.  (_To watch the agent, you should follow the instructions to [enable a virtual screen](https://github.com/Unity-Technologies/ml-agents/blob/master/docs/Training-on-Amazon-Web-Service.md), and then download the environment for the **Linux** operating system above._)
+#### Setup the right Python version
+Use Python 3.6. You may want to either use a virtual env or setup a Conda environment as explained here:
 
-2. Place the file in the DRLND GitHub repository, in the `p3_collab-compet/` folder, and unzip (or decompress) the file. 
+https://github.com/udacity/deep-reinforcement-learning#dependencies
 
-### Instructions
+#### Get the python dependencies requirements.txt
+Checkout the ./python folder of the Udacity DRLND repo:
 
-Follow the instructions in `Tennis.ipynb` to get started with training your own agent!  
+https://github.com/udacity/deep-reinforcement-learning
 
-### (Optional) Challenge: Crawler Environment
+It has a requirements.txt to ensure installing the necessary dependencies in the version specified by the course
+(do this only when you want to work locally). Otherwise use the reference notebook provided by the course which is pre setup properly.
 
-After you have successfully completed the project, you might like to solve the more difficult **Soccer** environment.
+#### Get the Pre-built Unity Environment
+Since this is an RL problem an environment is needed.
+The course requires you to use the pre-built environment.
+Get the right version for you from the link provided in [Tennis_Linux_NoVis/README] and [Tennis_Linux/README].
+The latter is recommended as you may need to work with the visual environment to understand how your agents 
+are interacting with the environment. 
 
-![Soccer][image2]
 
-In this environment, the goal is to train a team of agents to play soccer.  
+## Instructions
+Simply run main.py
+`
+python -m collaboration_and_competition.main.py
+`
 
-You can read more about this environment in the ML-Agents GitHub [here](https://github.com/Unity-Technologies/ml-agents/blob/master/docs/Learning-Environment-Examples.md#soccer-twos).  To solve this harder task, you'll need to download a new Unity environment.  (**Note**: Udacity students should not submit a project with this new environment.)
 
-You need only select the environment that matches your operating system:
-- Linux: [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P3/Soccer/Soccer_Linux.zip)
-- Mac OSX: [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P3/Soccer/Soccer.app.zip)
-- Windows (32-bit): [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P3/Soccer/Soccer_Windows_x86.zip)
-- Windows (64-bit): [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P3/Soccer/Soccer_Windows_x86_64.zip)
+## Sample output
+The Report.pdf is a report showing the results obtained when solving the challenge.
+The trained agent checkpoint files are found under [trained_models/](trained_models).
+The specific files with which the challenge was solved are mentioned in the report.
 
-Then, place the file in the `p3_collab-compet/` folder in the DRLND GitHub repository, and unzip (or decompress) the file.  Next, open `Soccer.ipynb` and follow the instructions to learn how to use the Python API to control the agent.
+## Implemented Solution and Lessons Learnt
+We use the multi-agent environment explained above. However, there is only one policy trained which interacts with all environments to collect experiences.
 
-(_For AWS_) If you'd like to train the agents on AWS (and have not [enabled a virtual screen](https://github.com/Unity-Technologies/ml-agents/blob/master/docs/Training-on-Amazon-Web-Service.md)), then please use [this link](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P3/Soccer/Soccer_Linux_NoVis.zip) to obtain the "headless" version of the environment.  You will **not** be able to watch the agents without enabling a virtual screen, but you will be able to train the agents.  (_To watch the agents, you should follow the instructions to [enable a virtual screen](https://github.com/Unity-Technologies/ml-agents/blob/master/docs/Training-on-Amazon-Web-Service.md), and then download the environment for the **Linux** operating system above._)
+A detailed treatment of the algorithm is provided in the report [Report.pdf](file). 
+
+### Ideas for the Future
+Ideas for the future are furthermore discussed in the report file.
+ 
+## Final notes
+Some of this submitted code builds upon the baseline notebooks and python files provided by Udacity.
