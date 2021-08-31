@@ -42,7 +42,7 @@ It has a requirements.txt to ensure installing the necessary dependencies in the
 #### Get the Pre-built Unity Environment
 Since this is an RL problem an environment is needed.
 The course requires you to use the pre-built environment.
-Get the right version for you from the link provided in [Tennis_Linux_NoVis/README] and [Tennis_Linux/README].
+Get the right version for you from the link provided in [Tennis_Linux_NoVis/README](Tennis_Linux_NoVis/README) and [Tennis_Linux/README](Tennis_Linux/README).
 The latter is recommended as you may need to work with the visual environment to understand how your agents 
 are interacting with the environment. 
 
@@ -50,19 +50,19 @@ are interacting with the environment.
 ## Instructions
 Simply run main.py
 `
-python -m collaboration_and_competition.main.py
+python -m collaboration_and_competition.main
 `
 
 
 ## Sample output
 The Report.pdf is a report showing the results obtained when solving the challenge.
-The trained agent checkpoint files are found under [trained_models/](trained_models).
+The trained agent checkpoint files are found under [trained_models/](trained_models/).
 The specific files with which the challenge was solved are mentioned in the report.
 
 ## Implemented Solution and Lessons Learnt
 We use the multi-agent environment explained above. However, there is only one policy trained which interacts with all environments to collect experiences.
 
-A detailed treatment of the algorithm is provided in the report [Report.pdf](file). 
+A detailed treatment of the algorithm is provided in the report [file](Report.pdf). 
 
 ### Ideas for the Future
 Ideas for the future are furthermore discussed in the report file.

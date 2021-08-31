@@ -1,6 +1,15 @@
+import os
+import pathlib
+
 import torch
 from unityagents import UnityEnvironment
 
+# Necessary to allow working from cmd line terminal as well (pycharm handles that by itself through setting
+# current workdir to the parent folder of the script)
+module_dir = pathlib.Path(__file__).parent.resolve()
+os.chdir(module_dir)
+
+print("----------------CWD: {}".format(os.getcwd()))
 USE_VIS=False
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 

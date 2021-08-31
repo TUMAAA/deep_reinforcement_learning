@@ -1,3 +1,8 @@
+# Simply run
+# python -m collaboration_and_competition_project.main
+# Notice the use of . not /
+# This is necessary to make the package collaboration_and_competition_project visible to the interpreter
+
 from collaboration_and_competition_project.ReplayBuffer import ReplayBuffer
 
 BUFFER_SIZE = int(1e5)  # replay buffer size # TODO: check value
