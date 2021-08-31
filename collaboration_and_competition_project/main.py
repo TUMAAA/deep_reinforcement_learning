@@ -73,7 +73,7 @@ agent = Agent(device=device,
               num_trainings_per_update=1,
               time_steps_before_training=1,
               batch_size=batch_size,
-              num_episodes_to_increase_num_trainings=180,
+              num_episodes_to_increase_num_trainings=800,
               lr_actor=1e-3,
               lr_critic=1e-3,
               clip_grad_norm=False,
@@ -84,7 +84,7 @@ episodes_to_make_target_equal_to_local = 200
 max_timesteps_per_episode = 8000
 
 scores_global, episode_durations, episode_timestep_reached = run_maddpg(agent=agent,
-                                        n_episodes=1000,
+                                        n_episodes=860,
                                         max_t=max_timesteps_per_episode,
                                         print_every=20,
                                         episodes_to_make_target_equal_to_local=episodes_to_make_target_equal_to_local)
