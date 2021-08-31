@@ -13,7 +13,7 @@ from .model import Actor, Critic
 
 GAMMA = 0.99  # discount factor to compute discounted returns
 TAU = 1e-3  # for soft update of target parameters
-NOISE_VARIANCE = 1.0
+MIN_NOISE_VARIANCE=0.04
 HIGH_REWARD = 0.1
 
 
@@ -32,7 +32,8 @@ class Agent():
                  lr_critic=1e-4,
                  time_steps_before_training=20,
                  num_trainings_per_update=1,
-                 noise_decay=1e-6,
+                 start_noise_variance=2.0,
+                 noise_decay=0.995,
                  num_episodes_to_increase_num_trainings=150,
                  weight_decay=0.0,
                  clip_grad_norm=False,
@@ -46,6 +47,7 @@ class Agent():
             action_size (int): dimension of each action
             random_seed (int): random seed
         """
+        self.start_noise_variance = start_noise_variance
         self.debug = debug
         self.add_samples_only_if_high_reward = add_samples_only_if_high_reward
         self.device = device
@@ -93,8 +95,8 @@ class Agent():
                                   range(self.num_competing_agents)]
 
         # Noise process
-        self.noise_variance = NOISE_VARIANCE
-        self.noise = OUNoise(action_size, random_seed)
+        self.noise = GaussianNoise(action_size=action_size)
+        #self.noise = OUNoise(action_size, random_seed)
 
         # Replay memory
         self.memory = replay_buffer
@@ -137,8 +139,11 @@ class Agent():
             action += self.noise_variance * self.noise.sample()
         return np.clip(action, -1, 1)
 
-    def reset(self):
-        self.noise_variance = NOISE_VARIANCE
+    def reset(self, i_episode):
+        self.noise_variance = max(self.start_noise_variance * self.noise_decay ** i_episode, MIN_NOISE_VARIANCE)
+        if i_episode % 100==0:
+            print("\rNoise variance: {}".format(self.noise_variance),end="\n")
+            time.sleep(2)
         self.noise.reset()
 
     def learn(self, joint_experiences_batch, gamma):
@@ -236,6 +241,22 @@ class OUNoise:
     def sample(self):
         """Update internal state and return it as a noise sample."""
         x = self.state
-        dx = self.theta * (self.mu - x) + self.sigma * np.array([random.gauss(mu=0.0,sigma=0.1) for i in range(len(x))])
+        dx = self.theta * (self.mu - x) + self.sigma * np.random.standard_normal(size=len(x))
         self.state = x + dx
         return self.state
+
+class GaussianNoise:
+    """Ornstein-Uhlenbeck process."""
+
+    def __init__(self, action_size):
+        """Initialize parameters and noise process."""
+        self.action_size = action_size
+
+    def reset(self):
+        """Reset the internal state (= noise) to mean (mu)."""
+        pass
+
+    def sample(self):
+        """Update internal state and return it as a noise sample."""
+        dx = np.random.standard_normal(size = self.action_size)
+        return dx

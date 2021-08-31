@@ -51,7 +51,7 @@ def run_maddpg(agent,
         env_info = env.reset(train_mode=True)[brain_name]
         num_agents = len(env_info.rewards)
         states = env_info.vector_observations
-        agent.reset()
+        agent.reset(i_episode)
         episode_score_per_agent = np.zeros(num_agents)
         for t in range(max_t):
             actions = [agent.act(states, i_agent) for i_agent in range(num_agents)]
