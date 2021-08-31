@@ -14,6 +14,7 @@ from .model import Actor, Critic
 GAMMA = 0.99  # discount factor to compute discounted returns
 TAU = 1e-3  # for soft update of target parameters
 NOISE_VARIANCE = 1.0
+HIGH_REWARD = 0.1
 
 
 class Agent():
@@ -35,6 +36,7 @@ class Agent():
                  num_episodes_to_increase_num_trainings=150,
                  weight_decay=0.0,
                  clip_grad_norm=False,
+                 add_samples_only_if_high_reward=False,
                  debug=False):
         """Initialize an Agent object.
 
@@ -45,6 +47,7 @@ class Agent():
             random_seed (int): random seed
         """
         self.debug = debug
+        self.add_samples_only_if_high_reward = add_samples_only_if_high_reward
         self.device = device
         self.clip_grad_norm = clip_grad_norm
         self.weight_decay = weight_decay
@@ -100,7 +103,14 @@ class Agent():
              agents_dones):
         """Save experience in replay memory, and use random sample from buffer to learn."""
         # Save experience / reward
-        self.memory.add(agents_states, agents_actions, agents_rewards, agents_next_states, agents_dones)
+        if self.add_samples_only_if_high_reward:
+            if np.any(np.asarray(agents_rewards) >= HIGH_REWARD):
+                self.memory.add(agents_states, agents_actions, agents_rewards, agents_next_states, agents_dones)
+                if self.debug:
+                    print("added new experience because rewards are {}".format(agents_rewards))
+                    time.sleep(1)
+        else:
+            self.memory.add(agents_states, agents_actions, agents_rewards, agents_next_states, agents_dones)
 
         if time_step % self.time_steps_before_training != 0:
             return

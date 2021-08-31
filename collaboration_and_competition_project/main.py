@@ -78,6 +78,7 @@ agent = Agent(device=device,
               lr_critic=1e-3,
               clip_grad_norm=False,
               replay_buffer=replay_buffer,
+              add_samples_only_if_high_reward=False,
               debug=False)
 
 episodes_to_make_target_equal_to_local = 200
@@ -100,6 +101,7 @@ details_dict = {"critic": agent.critics_local[0].__repr__(),
                  "num_trainings_per_update": agent.num_trainings_per_update,
                  "num_episodes_to_increase_num_trainings": agent.num_episodes_to_increase_num_trainings,
                  "noise_decay": agent.noise_decay,
+                 "add_samples_only_if_high_reward": agent.add_samples_only_if_high_reward,
                  "episodes_to_make_target_equal_to_local": episodes_to_make_target_equal_to_local
                  }
 generate_training_plots(scores_global, episode_durations, episode_timestep_reached,
