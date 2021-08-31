@@ -90,7 +90,7 @@ episodes_to_make_target_equal_to_local = 200
 max_timesteps_per_episode = 500
 
 scores_global, episode_durations, episode_timestep_reached = run_maddpg(agent=agent,
-                                        n_episodes=1500,
+                                        n_episodes=3000,
                                         max_t=max_timesteps_per_episode,
                                         print_every=20,
                                         episodes_to_make_target_equal_to_local=episodes_to_make_target_equal_to_local)
@@ -101,7 +101,7 @@ details_dict = {"critic": agent.critics_local[0].__repr__(),
                  "actor_optim": agent.actor_optimizers[0].__repr__().replace("\n", ", "),
                  "clip_grad_norm": agent.clip_grad_norm,
                  "batch_size": agent.batch_size,
-                 "max_t": episodes_to_make_target_equal_to_local,
+                 "max_t": max_timesteps_per_episode,
                  "time_steps_before_training": agent.time_steps_before_training,
                  "num_trainings_per_update": agent.num_trainings_per_update,
                  "num_episodes_to_increase_num_trainings": agent.num_episodes_to_increase_num_trainings,
