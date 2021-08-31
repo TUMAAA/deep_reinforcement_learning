@@ -48,11 +48,11 @@ are interacting with the environment.
 
 
 ## Instructions
-Simply run main.py
+Cd to the root of the repo then run
 `
 python -m collaboration_and_competition.main
 `
-
+If you run from the dir of the script main.py directly, the package collaboration_and_competition is not seen by the interpreter.
 
 ## Sample output
 The Report.pdf is a report showing the results obtained when solving the challenge.
