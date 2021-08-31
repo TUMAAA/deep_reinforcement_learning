@@ -81,7 +81,10 @@ agent = Agent(device=device,
               replay_buffer=replay_buffer,
               add_samples_only_if_high_reward=False,
               debug=False)
-
+# agent.actors_local[0]._load_from_state_dict(torch.load("trained_models/actor_reaches_0.3_0.pth"))
+# agent.actors_target[0].load_state_dict(torch.load("trained_models/actor_reaches_0.3_0.pth"))
+# agent.actors_local[1].load_state_dict(torch.load("trained_models/actor_reaches_0.3_1.pth"))
+# agent.actors_target[1].load_state_dict(torch.load("trained_models/actor_reaches_0.3_1.pth"))
 episodes_to_make_target_equal_to_local = 200
 max_timesteps_per_episode = 8000
 
