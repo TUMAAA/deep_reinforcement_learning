@@ -24,7 +24,7 @@ def generate_plot_name(attributes: dict):
     return title
 
 
-def generate_training_plots(scores_global, episode_durations, attributes):
+def generate_training_plots(scores_global, episode_durations, episode_timestep_reached, attributes):
     """
     Generates subplots showing the mean score and training duration per episode
     :param scores_global: List of mean scores where each element represents an episode
@@ -42,6 +42,12 @@ def generate_training_plots(scores_global, episode_durations, attributes):
     # grid_step = 0.2
     # ax_score.set_yticks(np.linspace(1, max_y, grid_step), minor=False)
     ax_score.yaxis.grid(True, which="major")
+
+    ax_ts_reached = fig.add_subplot(413)
+    num_episodes = len(episode_timestep_reached)
+    plt.plot(np.arange(1, num_episodes + 1), episode_timestep_reached)
+    plt.ylabel('Timestep reached')
+    plt.xlabel('Episode #')
 
     ax_duration = fig.add_subplot(414)
     num_episodes = len(episode_durations)
@@ -72,28 +78,29 @@ agent = Agent(device=device,
               lr_critic=1e-3,
               clip_grad_norm=False,
               replay_buffer=replay_buffer,
-              debug=True)
+              debug=False)
 
 episodes_to_make_target_equal_to_local = 200
 max_timesteps_per_episode = 8000
 
-scores_global, episode_durations = run_maddpg(agent=agent,
-                                        n_episodes=20,
+scores_global, episode_durations, episode_timestep_reached = run_maddpg(agent=agent,
+                                        n_episodes=1000,
                                         max_t=max_timesteps_per_episode,
                                         print_every=20,
                                         episodes_to_make_target_equal_to_local=episodes_to_make_target_equal_to_local)
 
-generate_training_plots(scores_global, episode_durations,
-                        {"critic": agent.critics_local[0].__repr__(),
-                         "actor": agent.actors_local[0].__repr__(),
-                         "critic_optim": agent.critic_optimizers[0].__repr__().replace("\n", ", "),
-                         "actor_optim": agent.actor_optimizers[0].__repr__().replace("\n", ", "),
-                         "clip_grad_norm": agent.clip_grad_norm,
-                         "batch_size": agent.batch_size,
-                         "max_t": episodes_to_make_target_equal_to_local,
-                         "time_steps_before_training": agent.time_steps_before_training,
-                         "num_trainings_per_update": agent.num_trainings_per_update,
-                         "num_episodes_to_increase_num_trainings": agent.num_episodes_to_increase_num_trainings,
-                         "noise_decay": agent.noise_decay,
-                         "episodes_to_make_target_equal_to_local": episodes_to_make_target_equal_to_local
-                         })
+details_dict = {"critic": agent.critics_local[0].__repr__(),
+                 "actor": agent.actors_local[0].__repr__(),
+                 "critic_optim": agent.critic_optimizers[0].__repr__().replace("\n", ", "),
+                 "actor_optim": agent.actor_optimizers[0].__repr__().replace("\n", ", "),
+                 "clip_grad_norm": agent.clip_grad_norm,
+                 "batch_size": agent.batch_size,
+                 "max_t": episodes_to_make_target_equal_to_local,
+                 "time_steps_before_training": agent.time_steps_before_training,
+                 "num_trainings_per_update": agent.num_trainings_per_update,
+                 "num_episodes_to_increase_num_trainings": agent.num_episodes_to_increase_num_trainings,
+                 "noise_decay": agent.noise_decay,
+                 "episodes_to_make_target_equal_to_local": episodes_to_make_target_equal_to_local
+                 }
+generate_training_plots(scores_global, episode_durations, episode_timestep_reached,
+                        details_dict)

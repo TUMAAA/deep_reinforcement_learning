@@ -39,9 +39,10 @@ def run_maddpg(agent,
             index is a multiple of this (set very high if you don't want that and want to rely on soft update only).
     :return: A tuple of a list of mean agent score per episode and a list of episode duration
     """
-    mean_episode_score_deque = deque(maxlen=print_every)
+    max_episode_score_deque = deque(maxlen=print_every)
     scores_global = []
     episode_durations = []
+    episode_timestep_reached=[-1.0]*n_episodes
     global_start_time = time.time()
     for i_episode in range(1, n_episodes + 1):
         episode_start_time = time.time()
@@ -69,33 +70,36 @@ def run_maddpg(agent,
             states = next_states
             episode_score_per_agent += rewards
             if np.any(dones):
+                episode_timestep_reached[i_episode-1]=t
                 break
+
         episode_durations.append(time.time() - episode_start_time)
-        mean_episode_score = np.mean(episode_score_per_agent)
-        mean_episode_score_deque.append(mean_episode_score)
-        scores_global.append(mean_episode_score)
-        print('\rEpisode {}\tMean (over agents) episode score: {:.2f}. '
+        max_episode_score = np.max(episode_score_per_agent)
+        max_episode_score_deque.append(max_episode_score)
+        scores_global.append(max_episode_score)
+        print('\rEpisode {}\tMax (over agents) episode score: {:.2f}. '
               'Duration: {:.1f}s'.format(i_episode,
-                                         mean_episode_score_deque[-1],
-                                         episode_durations[-1]), end="")
+                                         max_episode_score_deque[-1],
+                                         episode_durations[i_episode-1]), end="")
         save_checkpoints(agent)
         if i_episode % print_every == 0:
             print(
-                '\rEpisode {}\tAverage mean agent Score: {:.2f}. Average duration {:.1f}s. Averages over last {} episodes.'.format(
-                    i_episode, np.mean(mean_episode_score_deque), np.mean(episode_durations[-print_every:]),
-                    print_every))
+                '\rEpisode {}\tAverage max agent Score: {:.2f}. Average duration {:.1f}s. Avg timestep reached {}'.format(
+                    i_episode, np.mean(max_episode_score_deque), np.mean(episode_durations[-print_every:]),
+                    np.mean(episode_timestep_reached[i_episode-print_every:i_episode])))
 
         if np.mean(scores_global[-EPISODE_LENGTH_FOR_AVERAGING:]) >= MIN_AVG_SCORE_OVER_LAST_HUNDRED_EPISODES_TO_BEAT:
             print('\nEnvironment solved in {:d} episodes!\tAverage mean score over last 100 episodes: {:.2f}'
                   .format(i_episode - EPISODE_LENGTH_FOR_AVERAGING,
-                          np.mean(scores_global[-EPISODE_LENGTH_FOR_AVERAGING:])))
+                          np.mean(scores_global[i_episode-EPISODE_LENGTH_FOR_AVERAGING:i_episode])))
             save_checkpoints(agent)
             break
     print("")
     print("DONE ----------------------")
     print("Total time consumed: {:.1f}m".format((time.time() - global_start_time) / 60.0))
-
-    return scores_global, episode_durations
+    episode_timestep_reached_array = np.asarray(episode_timestep_reached)
+    episode_timestep_reached_array[episode_timestep_reached_array < 0 ] = max_t
+    return scores_global, episode_durations, episode_timestep_reached
 
 
 def reset_target_to_local(agent):
