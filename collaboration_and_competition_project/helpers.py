@@ -26,6 +26,11 @@ def generate_training_plots(scores_global, episode_durations, episode_timestep_r
     fig = plt.figure(figsize=[8, 12])
     ax_score = fig.add_subplot(412)
     plt.plot(np.arange(1, len(scores_global) + 1), scores_global)
+    scores_global_running_avg = np.asarray(scores_global)*0
+    for i in range(len(scores_global)):
+        scores_global_running_avg[i]=np.mean(np.asarray(scores_global[i-20+1:i+1]))
+        scores_global_running_avg[np.isnan(scores_global_running_avg)]=0.0
+    plt.plot(np.arange(1, len(scores_global) + 1), scores_global_running_avg,"r")
     plt.ylabel('Accum Rewards (Score)')
     plt.xlabel('Episode #')
     max_y = np.max(scores_global)
