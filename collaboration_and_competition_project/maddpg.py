@@ -6,11 +6,8 @@ import numpy as np
 import torch
 
 # This module should not have any configs of the agent
-from collaboration_and_competition_project import brain_name, env
-
-EPISODE_LENGTH_FOR_AVERAGING = 100  # num episodes over which score avg should be > MIN_AVG_SCORE_OVER_LAST_HUNDRED_EPISODES_TO_BEAT
-MIN_AVG_SCORE_OVER_LAST_HUNDRED_EPISODES_TO_BEAT = 0.5
-TRAINED_MODELS_DIR = "trained_models"
+from collaboration_and_competition_project import brain_name, env, EPISODE_LENGTH_FOR_AVERAGING, \
+    MIN_AVG_SCORE_OVER_LAST_HUNDRED_EPISODES_TO_BEAT, TRAINED_MODELS_DIR
 
 
 def save_checkpoints(agent):

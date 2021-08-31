@@ -24,3 +24,9 @@ states = env_info.vector_observations
 state_size = states.shape[1]
 print('There are {} agents. Each observes a state with length: {}'.format(states.shape[0], state_size))
 print('The state for the first agent looks like:', states[0])
+
+EPISODE_LENGTH_FOR_AVERAGING = 100  # num episodes over which score avg should be > MIN_AVG_SCORE_OVER_LAST_HUNDRED_EPISODES_TO_BEAT
+MIN_AVG_SCORE_OVER_LAST_HUNDRED_EPISODES_TO_BEAT = 0.5
+TRAINED_MODELS_DIR = "trained_models"
+MADDP_MODEL_SUBDIR="maddpg"
+DDP_MODEL_SUBDIR="ddpg"
