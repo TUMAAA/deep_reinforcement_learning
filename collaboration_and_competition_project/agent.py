@@ -201,6 +201,8 @@ class Agent():
         for i in range(self.num_competing_agents):
             self.actor_optimizers[i].zero_grad()
             actors_losses[i].backward(retain_graph=True)
+            if self.clip_grad_norm:
+                torch.nn.utils.clip_grad_norm_(self.actors_local[i].parameters(), 1)
             self.actor_optimizers[i].step()
 
 
